@@ -10,6 +10,7 @@ namespace MaxFlowMinCut.Lib.Network
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// The graph node.
@@ -17,7 +18,13 @@ namespace MaxFlowMinCut.Lib.Network
     [Serializable]
     public class Node
     {
-        public List<Edge> EdgesFrom { get; set; }
+        public Node(string name)
+        {
+            this.Name = name;
+            this.Edges = new List<Edge>();
+        }
+
+        public List<Edge> Edges { get; set; }
 
         public string Name { get; set; }
 

@@ -22,6 +22,12 @@ namespace MaxFlowMinCut.Lib
     [Serializable]
     public class Graph : ICloneable
     {
+        public Graph()
+        {
+            this.Nodes = new List<Node>();
+            this.Edges = new List<Edge>();
+        }
+
         public List<Node> Nodes { get; set; }
 
         public List<Edge> Edges { get; set; }
@@ -31,6 +37,7 @@ namespace MaxFlowMinCut.Lib
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             var memoryStream = new MemoryStream();
             binaryFormatter.Serialize(memoryStream, this);
+            memoryStream.Seek(0, SeekOrigin.Begin);
             Graph graph = (Graph)binaryFormatter.Deserialize(memoryStream);
 
             return graph;

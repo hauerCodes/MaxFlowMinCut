@@ -8,6 +8,11 @@ namespace MaxFlowMinCut.Wpf.Model
 {
     public class InputEdge
     {
+        public InputEdge()
+        {
+            this.Capacity = 0;
+        }
+
         public InputEdge(string nodeFrom, string nodeTo, int capacity)
         {
             this.NodeFrom = nodeFrom;
