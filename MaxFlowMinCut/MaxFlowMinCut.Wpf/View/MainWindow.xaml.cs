@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 namespace MaxFlowMinCut.Wpf.View
 {
     using MaxFlowMinCut.Wpf.ViewModel;
+    using MaxFlowMinCut.Wpf.Visualizer;
 
     using Microsoft.Msagl.Drawing;
 
@@ -35,14 +36,18 @@ namespace MaxFlowMinCut.Wpf.View
 
         }
 
-        private void OnResidualGraphChanged(object sender, Graph graph)
+        private void OnFlowGraphChanged(object sender, Lib.Graph libGraph)
         {
-            this.GViewerResidual.Graph = graph;
+            VisualGraph visualGraph = new VisualGraph(libGraph);
+            Graph msaglGraph = visualGraph.CreateFlowGraph();
+            this.GViewerFlow.Graph = msaglGraph;
         }
 
-        private void OnFlowGraphChanged(object sender, Graph graph)
+        private void OnResidualGraphChanged(object sender, Lib.Graph libGraph)
         {
-            this.GViewerFlow.Graph = graph;
+            VisualGraph visualGraph = new VisualGraph(libGraph);
+            Graph msaglGraph = visualGraph.CreateFlowGraph();
+            this.GViewerResidual.Graph = msaglGraph;
         }
     }
 }

@@ -7,19 +7,48 @@ using System.Threading.Tasks;
 namespace MaxFlowMinCut.Wpf.Visualizer
 {
     using Microsoft.Msagl.Drawing;
+    using Microsoft.Msagl.Mds;
 
     public class VisualGraph
     {
-        private Lib.Graph graph;
+        private Lib.Graph libGraph;
 
-        public VisualGraph(Lib.Graph graph)
+        public VisualGraph(Lib.Graph libGraph)
         {
-            this.graph = graph;
+            this.libGraph = libGraph;
         }
 
-        public Graph Create()
+        private Graph CreateGraph()
         {
-            return new Graph();
+            Graph msaglGraph = new Graph();
+            msaglGraph.Attr.OptimizeLabelPositions = true;
+            msaglGraph.Attr.LayerDirection = LayerDirection.LR;
+
+            return msaglGraph;
+        }
+
+        public Graph CreateFlowGraph()
+        {
+            var msaglGraph = this.CreateGraph();
+
+            foreach (var edge in this.libGraph.Edges)
+            {
+                msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}/{1}", edge.Flow, edge.Capacity), edge.NodeTo.Name);
+            }
+
+            return msaglGraph;
+        }
+
+        public Graph CreateResidualGraph()
+        {
+            var msaglGraph = this.CreateGraph();
+
+            foreach (var edge in this.libGraph.Edges)
+            {
+                msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}", edge.Capacity), edge.NodeTo.Name);
+            }
+
+            return msaglGraph;
         }
     }
 }

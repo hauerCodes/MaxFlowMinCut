@@ -16,14 +16,21 @@ namespace MaxFlowMinCut.Lib.Network
     [Serializable]
     public class Edge
     {
-        public Node From { get; set; }
+        public Edge(Node nodeFrom, Node nodeTo, int capacity)
+        {
+            this.NodeFrom = nodeFrom;
+            this.NodeTo = nodeTo;
+            this.Capacity = capacity;
+        }
 
-        public Node To { get; set; }
+        public Node NodeFrom { get; set; }
+
+        public Node NodeTo { get; set; }
 
         public int Capacity { get; set; }
 
         public int Flow { get; set; }
 
-        public int Label { get; set; }
+        public string Label { get; set; }
     }
 }
