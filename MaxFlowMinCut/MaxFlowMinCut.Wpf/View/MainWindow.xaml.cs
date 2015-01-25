@@ -31,16 +31,17 @@ namespace MaxFlowMinCut.Wpf.View
             InitializeComponent();
 
             this.viewModel = (MainWindowViewModel)this.DataContext;
-            this.viewModel.FlowGraphChanged += OnFlowGraphChanged;
-            this.viewModel.ResidualGraphChanged += OnResidualGraphChanged;
-
+            this.viewModel.FlowGraphChanged += this.OnFlowGraphChanged;
+            this.viewModel.ResidualGraphChanged += this.OnResidualGraphChanged;
         }
 
         private void OnFlowGraphChanged(object sender, Lib.Graph libGraph)
         {
             VisualGraph visualGraph = new VisualGraph(libGraph);
             Graph msaglGraph = visualGraph.CreateFlowGraph();
+            this.GViewerFlow.NeedToCalculateLayout = true;
             this.GViewerFlow.Graph = msaglGraph;
+            this.GViewerFlow.NeedToCalculateLayout = false;
         }
 
         private void OnResidualGraphChanged(object sender, Lib.Graph libGraph)

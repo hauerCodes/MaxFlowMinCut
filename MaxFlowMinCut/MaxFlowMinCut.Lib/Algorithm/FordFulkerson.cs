@@ -90,8 +90,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
         private void FindMaxFlow(Node sourceNode, Node terminalNode)
         {
-            var path = this.BreadthFirstSearch(sourceNode, terminalNode);
             this.maxFlow = 0;
+
+            var path = this.BreadthFirstSearch(sourceNode, terminalNode);
 
             while (path != null && path.Count > 0)
             {
@@ -196,7 +197,6 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
             return null;
         }
-
 
         static List<Edge> GetPath(Node currentNode)
         {

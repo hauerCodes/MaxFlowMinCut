@@ -10,13 +10,14 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
+            <RowDefinition Height="50"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="25*"/>
             <ColumnDefinition Width="75*"/>
         </Grid.ColumnDefinitions>
-        <GroupBox Grid.Row="0" Grid.Column="0" Header="Graph-Input" Margin="5" Padding="5">
+        <GroupBox Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Header="Graph-Input" FontWeight="DemiBold" Margin="5" Padding="5">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -29,18 +30,43 @@
                         <DataGridTextColumn Header="Capacity" Binding="{Binding Capacity}" Width="Auto"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Button Grid.Row="1" Command="{Binding VisualizeFlowGraphCommand}" VerticalAlignment="Center" Content="Visualize Graph"/>
+                <Button Grid.Row="1" Command="{Binding VisualizeFlowGraphCommand}" VerticalAlignment="Bottom" Content="Visualize Graph"/>
             </Grid>
 
         </GroupBox>
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Graph-Output" Margin="5">
-
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="❚◀◀"/>
+            <Button Grid.Column="1" Content="◀◀"/>
+            <Button Grid.Column="2" Content="▶"/>
+            <Button Grid.Column="3" Content="❚❚"/>
+            <Button Grid.Column="4" Content="■"/>
+            <Button Grid.Column="5" Content="▶▶"/>
+            <Button Grid.Column="6" Content="▶▶❚"/>
+        </Grid>
+        <GroupBox Grid.Row="2" Grid.Column="0" Header="Graph-Output" FontWeight="DemiBold" Margin="5" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Max-Flow:"/>
+                <TextBox Text="0" HorizontalContentAlignment="Right"/>
+                <TextBlock/>
+                <TextBlock Text="Max-Cut:" />
+                <TextBox Text="0" HorizontalContentAlignment="Right"/>
+                
+            </StackPanel>
         </GroupBox>
         <WindowsFormsHost Grid.Row="0" Grid.Column="1" Name="windowsFormsHostFlowGraph">
-            <gv:GViewer x:Name="GViewerFlow" ToolBarIsVisible="False" CurrentLayoutMethod="SugiyamaScheme" ></gv:GViewer>
+            <gv:GViewer x:Name="GViewerFlow" ToolBarIsVisible="False" CurrentLayoutMethod="SugiyamaScheme"/>
         </WindowsFormsHost>
-        <WindowsFormsHost Grid.Row="1" Grid.Column="1" Name="windowsFormsHostResidualGraph">
-            <gv:GViewer x:Name="GViewerResidual" ToolBarIsVisible="False" CurrentLayoutMethod="SugiyamaScheme"></gv:GViewer>
+        <WindowsFormsHost Grid.Row="2" Grid.Column="1" Name="windowsFormsHostResidualGraph">
+            <gv:GViewer x:Name="GViewerResidual" ToolBarIsVisible="False" CurrentLayoutMethod="SugiyamaScheme"/>
         </WindowsFormsHost>
     </Grid>
 </Window>
