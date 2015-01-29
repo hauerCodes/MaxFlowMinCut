@@ -101,7 +101,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Model\InputEdge.cs" />
+    <Compile Include="UserControl\DependencyGraphWrapper.xaml.cs">
+      <DependentUpon>DependencyGraphWrapper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\HistoryViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="View\HistoryView.xaml.cs">
+      <DependentUpon>HistoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -137,6 +144,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UserControl\DependencyGraphWrapper.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\HistoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

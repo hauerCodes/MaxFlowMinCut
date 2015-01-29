@@ -26,6 +26,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
     using MaxFlowMinCut.Lib;
     using MaxFlowMinCut.Lib.Algorithm;
     using MaxFlowMinCut.Lib.History;
+    using MaxFlowMinCut.Wpf.View;
 
     using Mutzl.MvvmLight;
 
@@ -77,6 +78,22 @@ namespace MaxFlowMinCut.Wpf.ViewModel
                 () => this.IsCalculated,
                 this,
                 () => this.IsCalculated);
+
+            this.ShowGraphHistoryCommand = new DependentRelayCommand(
+                this.ExecuteShowGraphHistory,
+            () => this.IsCalculated,
+            this,
+            () => this.IsCalculated);
+        }
+
+        private void ExecuteShowGraphHistory()
+        {
+            HistoryView view = new HistoryView 
+            {
+                DataContext = new HistoryViewModel(this.graphSteps)
+            };
+
+            view.Show();
         }
 
         /// <summary>
@@ -156,6 +173,8 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public RelayCommand ClearGraphCommand { get; private set; }
         public DependentRelayCommand CalculateCommand { get; private set; }
         public RelayCommand VisualizeFlowGraphCommand { get; private set; }
+
+        public DependentRelayCommand ShowGraphHistoryCommand { get; set; }
 
         public ObservableCollection<InputEdge> InputEdges { get; private set; }
 
