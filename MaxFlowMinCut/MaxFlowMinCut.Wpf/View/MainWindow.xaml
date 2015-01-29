@@ -40,7 +40,10 @@
                     <Button  Command="{Binding VisualizeFlowGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Visualize Input Graph"/>
                         <Button  Command="{Binding CalculateCommand}" Margin="5" VerticalAlignment="Bottom" Content="Calculate"/>
                     <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Clear Graph"/>
-                </StackPanel>
+                        <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Load Graph"/>
+                        <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Save Graph"/>
+                        <Button  Command="{Binding ShowGraphHistoryCommand}" Margin="5" VerticalAlignment="Bottom" Content="Show Graph History"/>
+                    </StackPanel>
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="0" Header="Graph-Output" FontWeight="DemiBold" Margin="5" Padding="5">
