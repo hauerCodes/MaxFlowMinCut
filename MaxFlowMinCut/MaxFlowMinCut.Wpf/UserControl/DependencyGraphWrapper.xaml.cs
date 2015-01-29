@@ -1,94 +1,123 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DependencyGraphWrapper.xaml.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
+// </copyright>
+// <summary>
+//   The dependency graph wrapper.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace MaxFlowMinCut.Wpf.UserControl
 {
     using System.ComponentModel;
-    using System.Diagnostics;
-        using System.Windows;
-        using System.Windows.Controls;
-        using System.Windows.Forms.Integration;
-        using MaxFlowMinCut.Lib;
-        using MaxFlowMinCut.Wpf.Visualizer;
+    using System.Windows;
+    using System.Windows.Controls;
 
-        using Microsoft.Msagl.Drawing;
-        using Microsoft.Msagl.GraphViewerGdi;
+    using MaxFlowMinCut.Lib;
+    using MaxFlowMinCut.Wpf.Visualizer;
 
-        public partial class DependencyGraphWrapper : UserControl
+    using Microsoft.Msagl.GraphViewerGdi;
+
+    /// <summary>
+    /// The dependency graph wrapper.
+    /// </summary>
+    public partial class DependencyGraphWrapper : UserControl
+    {
+        /// <summary>
+        /// The flow graph property.
+        /// </summary>
+        public static readonly DependencyProperty FlowGraphProperty = DependencyProperty.Register(
+            "FlowGraph", 
+            typeof(Graph), 
+            typeof(DependencyGraphWrapper), 
+            new PropertyMetadata());
+
+        /// Using a DependencyProperty as the backing store for Viewer.  This enables animation, styling, binding, etc...
+        /// <summary>
+        /// The residual graph property.
+        /// </summary>
+        public static readonly DependencyProperty ResidualGraphProperty = DependencyProperty.Register(
+            "ResidualGraph", 
+            typeof(Graph), 
+            typeof(DependencyGraphWrapper), 
+            new PropertyMetadata());
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DependencyGraphWrapper"/> class.
+        /// </summary>
+        public DependencyGraphWrapper()
         {
-            public DependencyGraphWrapper()
-            {
-                this.InitializeComponent();
+            this.InitializeComponent();
 
-                DependencyPropertyDescriptor
-                    .FromProperty(DependencyGraphWrapper.FlowGraphProperty, typeof(DependencyGraphWrapper))
-                    .AddValueChanged(this, (s, e) =>
-                    {
-                        if (Viewer != null && Viewer.Child != null && Viewer.Child is GViewer)
+            DependencyPropertyDescriptor.FromProperty(FlowGraphProperty, typeof(DependencyGraphWrapper))
+                .AddValueChanged(
+                    this, 
+                    (s, e) =>
                         {
-                            App.Current.Dispatcher.Invoke(() =>
+                            if (this.Viewer != null && this.Viewer.Child != null && this.Viewer.Child is GViewer)
                             {
-                                (Viewer.Child as GViewer).Graph = new VisualGraph(FlowGraph).CreateFlowGraph();
-                            });
-                        }
-                    });
+                                Application.Current.Dispatcher.Invoke(
+                                    () =>
+                                        {
+                                            (this.Viewer.Child as GViewer).Graph =
+                                                new VisualGraph(this.FlowGraph).CreateFlowGraph();
+                                        });
+                            }
+                        });
 
-                DependencyPropertyDescriptor
-                   .FromProperty(DependencyGraphWrapper.ResidualGraphProperty, typeof(DependencyGraphWrapper))
-                   .AddValueChanged(this, (s, e) =>
-                   {
-                       if (Viewer != null && Viewer.Child != null && Viewer.Child is GViewer)
-                       {
-                           App.Current.Dispatcher.Invoke(() =>
+            DependencyPropertyDescriptor.FromProperty(ResidualGraphProperty, typeof(DependencyGraphWrapper))
+                .AddValueChanged(
+                    this, 
+                    (s, e) =>
+                        {
+                            if (this.Viewer != null && this.Viewer.Child != null && this.Viewer.Child is GViewer)
                             {
-                                (Viewer.Child as GViewer).Graph = new VisualGraph(ResidualGraph).CreateFlowGraph();
-                            });
-                       }
-                   });
-            }
+                                Application.Current.Dispatcher.Invoke(
+                                    () =>
+                                        {
+                                            (this.Viewer.Child as GViewer).Graph =
+                                                new VisualGraph(this.ResidualGraph).CreateFlowGraph();
+                                        });
+                            }
+                        });
+        }
 
-            /// <summary>
-            /// Gets or sets the graph.
-            /// </summary>
-            /// <value>
-            /// The graph.
-            /// </value>
-            public Lib.Graph FlowGraph
+        /// <summary>
+        /// Gets or sets the graph.
+        /// </summary>
+        /// <value>
+        /// The graph.
+        /// </value>
+        public Graph FlowGraph
+        {
+            get
             {
-                get { return (Lib.Graph)GetValue(FlowGraphProperty); }
-                set
-                {
-                    SetValue(FlowGraphProperty, value);
-                }
+                return (Graph)this.GetValue(FlowGraphProperty);
             }
 
-            public static readonly DependencyProperty FlowGraphProperty =
-               DependencyProperty.Register("FlowGraph", typeof(Lib.Graph), typeof(DependencyGraphWrapper), new PropertyMetadata());
-
-            public Lib.Graph ResidualGraph
+            set
             {
-                get { return (Lib.Graph)GetValue(ResidualGraphProperty); }
-                set
-                {
-                    SetValue(ResidualGraphProperty, value);
+                this.SetValue(FlowGraphProperty, value);
+            }
+        }
 
-                }
+        /// <summary>
+        /// Gets or sets the residual graph.
+        /// </summary>
+        /// <value>
+        /// The residual graph.
+        /// </value>
+        public Graph ResidualGraph
+        {
+            get
+            {
+                return (Graph)this.GetValue(ResidualGraphProperty);
             }
 
-            // Using a DependencyProperty as the backing store for Viewer.  This enables animation, styling, binding, etc...
-            public static readonly DependencyProperty ResidualGraphProperty =
-                DependencyProperty.Register("ResidualGraph", typeof(Lib.Graph), typeof(DependencyGraphWrapper), new PropertyMetadata());
+            set
+            {
+                this.SetValue(ResidualGraphProperty, value);
+            }
         }
     }
+}

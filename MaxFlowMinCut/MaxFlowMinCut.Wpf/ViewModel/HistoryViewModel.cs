@@ -1,26 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="HistoryViewModel.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
+// </copyright>
+// <summary>
+//   The history view model.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace MaxFlowMinCut.Wpf.ViewModel
 {
+    using System.Windows;
+
     using MaxFlowMinCut.Lib.History;
 
+    /// <summary>
+    /// The history view model.
+    /// </summary>
     public class HistoryViewModel
     {
-
         /// <summary>
         /// Initializes a new instance of the <see cref="HistoryViewModel"/> class.
         /// </summary>
-        /// <param name="history">The history.</param>
+        /// <param name="history">
+        /// The history.
+        /// </param>
         public HistoryViewModel(GraphHistory history)
         {
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                this.History = history;
-            });
+            Application.Current.Dispatcher.Invoke(() => { this.History = history; });
         }
 
         /// <summary>

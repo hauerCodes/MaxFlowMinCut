@@ -1,15 +1,16 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="FordFulkerson.cs" company="FH Wr.Neustadt">
-//      Copyright Christoph Hauer. All rights reserved.
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="FordFulkerson.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
 // </copyright>
-// <author>Christoph Hauer</author>
-// <summary>MaxFlowMinCut.Lib - FordFulkerson.cs</summary>
-// -----------------------------------------------------------------------
+// <summary>
+//   The ford fulkerson algorithm.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 namespace MaxFlowMinCut.Lib.Algorithm
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Drawing;
     using System.Linq;
 
     using MaxFlowMinCut.Lib.History;
@@ -21,9 +22,29 @@ namespace MaxFlowMinCut.Lib.Algorithm
     public class FordFulkerson
     {
         /// <summary>
+        /// The min cut nodes.
+        /// </summary>
+        private readonly List<Node> minCutNodes = new List<Node>();
+
+        /// <summary>
+        /// The source node name.
+        /// </summary>
+        private readonly string sourceNodeName;
+
+        /// <summary>
+        /// The terminal node name.
+        /// </summary>
+        private readonly string terminalNodeName;
+
+        /// <summary>
         /// The flow graph.
         /// </summary>
         private Graph flowGraph;
+
+        /// <summary>
+        /// The graph history.
+        /// </summary>
+        private GraphHistory graphHistory;
 
         /// <summary>
         /// The max flow.
@@ -36,24 +57,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
         private List<Edge> minCutEdges = new List<Edge>();
 
         /// <summary>
-        /// The min cut nodes.
-        /// </summary>
-        private List<Node> minCutNodes = new List<Node>();
-
-        /// <summary>
-        /// The residual graph
+        /// The residual graph.
         /// </summary>
         private Graph residualGraph;
-
-        /// <summary>
-        /// The source node name.
-        /// </summary>
-        private string sourceNodeName;
-
-        /// <summary>
-        /// The terminal node name.
-        /// </summary>
-        private string terminalNodeName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FordFulkerson"/> class.
@@ -72,36 +78,22 @@ namespace MaxFlowMinCut.Lib.Algorithm
             this.sourceNodeName = sourceNodeName;
             this.terminalNodeName = terminalNodeName;
 
-            Initialize(inputGraph);
+            this.Initialize(inputGraph);
 
-            //foreach (var edge in this.residualGraph.Edges.ToList())
-            //{
-            //    var residualEdge = new Edge(edge.NodeTo, edge.NodeFrom, 0);
-            //    edge.NodeTo.Edges.Add(residualEdge);
-            //    this.residualGraph.Edges.Add(residualEdge);
-            //}
-        }
-
-        /// <summary>
-        /// Initializes the specified input graph.
-        /// </summary>
-        /// <param name="inputGraph">The input graph.</param>
-        private void Initialize(Graph inputGraph)
-        {
-            this.flowGraph = (Graph)inputGraph.Clone();
-            this.residualGraph = (Graph)inputGraph.Clone();
-
-            foreach (var edge in this.residualGraph.Edges.ToList())
-            {
-                var residualEdge = new Edge(edge.NodeTo, edge.NodeFrom, 0);
-                edge.NodeTo.Edges.Add(residualEdge);
-                this.residualGraph.Edges.Add(residualEdge);
-            }
+            // foreach (var edge in this.residualGraph.Edges.ToList())
+            // {
+            // var residualEdge = new Edge(edge.NodeTo, edge.NodeFrom, 0);
+            // edge.NodeTo.Edges.Add(residualEdge);
+            // this.residualGraph.Edges.Add(residualEdge);
+            // }
         }
 
         /// <summary>
         /// Gets the max flow.
         /// </summary>
+        /// <value>
+        /// The max flow.
+        /// </value>
         public int MaxFlow
         {
             get
@@ -113,6 +105,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// <summary>
         /// Gets the min cut.
         /// </summary>
+        /// <value>
+        /// The min cut.
+        /// </value>
         public int MinCut
         {
             get
@@ -122,11 +117,6 @@ namespace MaxFlowMinCut.Lib.Algorithm
         }
 
         /// <summary>
-        /// The graph history.
-        /// </summary>
-        private GraphHistory graphHistory;
-
-        /// <summary>
         /// The run algorithm.
         /// </summary>
         /// <returns>
@@ -134,13 +124,13 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// </returns>
         public GraphHistory RunAlgorithm()
         {
-            graphHistory = new GraphHistory();
+            this.graphHistory = new GraphHistory();
 
-            Node sourceNode = this.residualGraph.Nodes.Find(n => n.Name.Equals(this.sourceNodeName));
-            Node terminalNode = this.residualGraph.Nodes.Find(n => n.Name.Equals(this.terminalNodeName));
+            var sourceNode = this.residualGraph.Nodes.Find(n => n.Name.Equals(this.sourceNodeName));
+            var terminalNode = this.residualGraph.Nodes.Find(n => n.Name.Equals(this.terminalNodeName));
 
             // add initial step to graph history
-            graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
+            this.graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
 
             Debug.WriteLine("\n** FordFulkerson");
 
@@ -150,7 +140,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
             // MIN-CUT
             this.FindMinCut(sourceNode);
-            graphHistory.AddGraphStep(this.flowGraph);
+            this.graphHistory.AddGraphStep(this.flowGraph);
 
             Debug.WriteLine("Min-Cut: {0}", this.MinCut);
 
@@ -160,7 +150,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
             Debug.WriteLine("Min-Cut-Edges:");
             this.minCutEdges.ForEach(e => Debug.WriteLine("{0}--{1}-->{2}", e.NodeFrom.Name, e.Capacity, e.NodeTo.Name));
 
-            return graphHistory;
+            return this.graphHistory;
         }
 
         /// <summary>
@@ -187,10 +177,10 @@ namespace MaxFlowMinCut.Lib.Algorithm
         }
 
         /// <summary>
-        /// The augmented path.
+        /// Augments the specified path. 
         /// </summary>
         /// <param name="path">
-        /// The path.
+        /// The path in the graph.
         /// </param>
         /// <param name="minCapacity">
         /// The min capacity.
@@ -201,7 +191,8 @@ namespace MaxFlowMinCut.Lib.Algorithm
             {
                 var flowEdge = this.flowGraph.Edges.FirstOrDefault(e => e.Equals(edge));
 
-                if(flowEdge != null){
+                if (flowEdge != null)
+                {
                     flowEdge.Flow += minCapacity;
                 }
 
@@ -270,12 +261,12 @@ namespace MaxFlowMinCut.Lib.Algorithm
         {
             this.maxFlow = 0;
 
-            List<Edge> path = this.BreadthFirstSearch(sourceNode, terminalNode);
+            var path = this.BreadthFirstSearch(sourceNode, terminalNode);
 
             // color found path
-            HighlightFoundPath(path);
-            graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
-            ResetHighlight(path);
+            this.HighlightFoundPath(path);
+            this.graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
+            this.ResetHighlight(path);
 
             while (path != null && path.Count > 0)
             {
@@ -283,51 +274,23 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
                 this.AugmentPath(path, minCapacity);
 
-                //TODO update flow values in flow graph
-                //List<Edge> updatedPath = this.UpdateFlowValuesFlowGraph(path, minCapacity);
-                graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
+                this.graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
 
                 this.maxFlow += minCapacity;
                 path = this.BreadthFirstSearch(sourceNode, terminalNode);
 
-                HighlightFoundPath(path);
-                graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
-                ResetHighlight(path);
+                this.HighlightFoundPath(path);
+                this.graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
+                this.ResetHighlight(path);
             }
         }
-
-        //private List<Edge> UpdateFlowValuesFlowGraph(List<Edge> path, int minCapacity)
-        //{
-        //    List<Edge> updatedPath = new List<Edge>();
-
-        //    foreach (var edge in path)
-        //    {
-        //        Edge found = flowGraph.Edges.FirstOrDefault(e => e.NodeFrom.Name.Equals(edge.NodeFrom.Name) && e.NodeTo.Name.Equals(edge.NodeTo.Name));
-
-        //        if (found != null)
-        //        {
-        //            found.Flow += minCapacity;
-        //        }
-        //        else
-        //        {
-        //            found = flowGraph.Edges.FirstOrDefault(e => e.NodeTo.Name.Equals(edge.NodeFrom.Name) && e.NodeFrom.Name.Equals(edge.NodeTo.Name));
-
-        //            if (found != null)
-        //            {
-        //                //todo check
-        //                found.Flow -= minCapacity;
-        //            }
-        //        }
-
-        //        updatedPath.Add(found);
-        //    }
-        //    return updatedPath;
-        //}
 
         /// <summary>
         /// Highlights the found path.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">
+        /// The path in the graph.
+        /// </param>
         private void HighlightFoundPath(List<Edge> path)
         {
             if (path != null)
@@ -339,7 +302,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// <summary>
         /// Resets the highlight.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">
+        /// The path in the graph.
+        /// </param>
         private void ResetHighlight(List<Edge> path)
         {
             if (path != null)
@@ -352,7 +317,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// The find min cut.
         /// </summary>
         /// <param name="root">
-        /// The root.
+        /// The root node.
         /// </param>
         private void FindMinCut(Node root)
         {
@@ -404,8 +369,27 @@ namespace MaxFlowMinCut.Lib.Algorithm
                 }
             }
 
-            minCutNodes.ForEach(mcn => mcn.IsMinCut = true);
-            minCutEdges.ForEach(mcn => mcn.IsMinCut = true);
+            this.minCutNodes.ForEach(mcn => mcn.IsMinCut = true);
+            this.minCutEdges.ForEach(mcn => mcn.IsMinCut = true);
+        }
+
+        /// <summary>
+        /// Initializes the specified input graph.
+        /// </summary>
+        /// <param name="inputGraph">
+        /// The input graph.
+        /// </param>
+        private void Initialize(Graph inputGraph)
+        {
+            this.flowGraph = (Graph)inputGraph.Clone();
+            this.residualGraph = (Graph)inputGraph.Clone();
+
+            foreach (var edge in this.residualGraph.Edges.ToList())
+            {
+                var residualEdge = new Edge(edge.NodeTo, edge.NodeFrom, 0);
+                edge.NodeTo.Edges.Add(residualEdge);
+                this.residualGraph.Edges.Add(residualEdge);
+            }
         }
     }
 }

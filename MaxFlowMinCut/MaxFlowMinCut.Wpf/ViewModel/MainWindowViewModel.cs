@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MainWindowViewModel.cs" company="FH Wr. Neustadt">
-//   Christoph Hauer & Markus Zytek
+//   Christoph Hauer / Markus Zytek. All rights reserved.
 // </copyright>
 // <summary>
 //   The main window view model.
@@ -70,6 +70,16 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.InitializeGraph();
             this.InitializeCommands();
         }
+
+        /// <summary>
+        /// The flow graph changed.
+        /// </summary>
+        public event EventHandler<Graph> FlowGraphChanged;
+
+        /// <summary>
+        /// The residual graph changed.
+        /// </summary>
+        public event EventHandler<Graph> ResidualGraphChanged;
 
         /// <summary>
         /// Gets a value indicating whether is visualized.
@@ -168,7 +178,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public DependentRelayCommand ShowGraphHistoryCommand { get; set; }
 
         /// <summary>
-        /// Gets the input edges.
+        /// Gets or sets the input edges.
         /// </summary>
         /// <value>
         /// The input edges.
@@ -253,6 +263,43 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public RelayCommand SaveGraphCommand { get; set; }
 
         /// <summary>
+        /// The convert input edges to graph.
+        /// </summary>
+        /// <param name="inputEdges">
+        /// The input edges.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Graph"/>.
+        /// </returns>
+        private static Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
+        {
+            var graph = new Graph();
+
+            foreach (var inputEdge in inputEdges)
+            {
+                var nodeFrom = graph.Nodes.Find(n => n.Name.Equals(inputEdge.NodeFrom));
+                if (nodeFrom == null)
+                {
+                    nodeFrom = new Node(inputEdge.NodeFrom);
+                    graph.Nodes.Add(nodeFrom);
+                }
+
+                var nodeTo = graph.Nodes.Find(n => n.Name.Equals(inputEdge.NodeTo));
+                if (nodeTo == null)
+                {
+                    nodeTo = new Node(inputEdge.NodeTo);
+                    graph.Nodes.Add(nodeTo);
+                }
+
+                var edge = new Edge(nodeFrom, nodeTo, inputEdge.Capacity);
+                nodeFrom.Edges.Add(edge);
+                graph.Edges.Add(edge);
+            }
+
+            return graph;
+        }
+
+        /// <summary>
         /// The initialize fields.
         /// </summary>
         private void InitializeFields()
@@ -286,7 +333,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
 
             this.StepForwardCommand = new RelayCommand(
                 this.ExecuteVisualizeNextGraphStep, 
-                this.CanExecuteStepForewardCommand);
+                this.CanExecuteStepForwardCommand);
 
             this.PlayStepsCommand = new RelayCommand(this.ExecutePlaySteps, this.CanExecutePlayStepsCommand);
 
@@ -341,7 +388,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute save graph command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute save graph command.
         /// </returns>
         private bool CanExecuteSaveGraphCommand()
         {
@@ -385,7 +432,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute load graph command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute load graph.
         /// </returns>
         private bool CanExecuteLoadGraphCommand()
         {
@@ -396,7 +443,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute show graph history command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute show history.
         /// </returns>
         private bool CanExecuteShowGraphHistoryCommand()
         {
@@ -407,7 +454,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute calculate command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute calculate.
         /// </returns>
         private bool CanExecuteCalculateCommand()
         {
@@ -422,7 +469,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute pause steps command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute pause.
         /// </returns>
         private bool CanExecutePauseStepsCommand()
         {
@@ -441,7 +488,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute play steps command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute play.
         /// </returns>
         private bool CanExecutePlayStepsCommand()
         {
@@ -483,7 +530,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute last step command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute last step.
         /// </returns>
         private bool CanExecuteLastStepCommand()
         {
@@ -504,7 +551,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute first step command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute frist step.
         /// </returns>
         private bool CanExecuteFirstStepCommand()
         {
@@ -522,12 +569,12 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         }
 
         /// <summary>
-        /// The can execute step foreward command.
+        /// The can execute step forward command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute forward.
         /// </returns>
-        private bool CanExecuteStepForewardCommand()
+        private bool CanExecuteStepForwardCommand()
         {
             return this.IsCalculated && this.IsVisualized && this.currentStep < this.graphSteps.LastStep
                    && !this.playStepsDispatcherTimer.IsEnabled;
@@ -537,7 +584,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute step backward command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute backward.
         /// </returns>
         private bool CanExecuteStepBackwardCommand()
         {
@@ -650,7 +697,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The can execute visualize command.
         /// </summary>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// True, if can execute visualize.
         /// </returns>
         private bool CanExecuteVisualizeCommand()
         {
@@ -670,53 +717,6 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.MinCut = 0;
             this.MaxFlow = 0;
         }
-
-        /// <summary>
-        /// The convert input edges to graph.
-        /// </summary>
-        /// <param name="inputEdges">
-        /// The input edges.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Graph"/>.
-        /// </returns>
-        private static Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
-        {
-            var graph = new Graph();
-
-            foreach (var inputEdge in inputEdges)
-            {
-                var nodeFrom = graph.Nodes.Find(n => n.Name.Equals(inputEdge.NodeFrom));
-                if (nodeFrom == null)
-                {
-                    nodeFrom = new Node(inputEdge.NodeFrom);
-                    graph.Nodes.Add(nodeFrom);
-                }
-
-                var nodeTo = graph.Nodes.Find(n => n.Name.Equals(inputEdge.NodeTo));
-                if (nodeTo == null)
-                {
-                    nodeTo = new Node(inputEdge.NodeTo);
-                    graph.Nodes.Add(nodeTo);
-                }
-
-                var edge = new Edge(nodeFrom, nodeTo, inputEdge.Capacity);
-                nodeFrom.Edges.Add(edge);
-                graph.Edges.Add(edge);
-            }
-
-            return graph;
-        }
-
-        /// <summary>
-        /// The flow graph changed.
-        /// </summary>
-        public event EventHandler<Graph> FlowGraphChanged;
-
-        /// <summary>
-        /// The residual graph changed.
-        /// </summary>
-        public event EventHandler<Graph> ResidualGraphChanged;
 
         /// <summary>
         /// The raise flow graph changed.

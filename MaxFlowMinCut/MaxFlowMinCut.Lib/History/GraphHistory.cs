@@ -1,13 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="GraphHistory.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
+// </copyright>
+// <summary>
+//   The graph history.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 namespace MaxFlowMinCut.Lib.History
 {
     using System.Collections;
+    using System.Collections.Generic;
 
+    /// <summary>
+    /// The graph history.
+    /// </summary>
     public class GraphHistory : IEnumerable
     {
         /// <summary>
@@ -19,22 +25,6 @@ namespace MaxFlowMinCut.Lib.History
         }
 
         /// <summary>
-        /// Gets the <see cref="Graph"/> at the specified index.
-        /// </summary>
-        /// <value>
-        /// The <see cref="Graph"/>.
-        /// </value>
-        /// <param name="index">The index.</param>
-        /// <returns></returns>
-        public GraphHistoryStep this[int index]
-        {
-            get
-            {
-                return Steps[index];
-            }
-        }
-
-        /// <summary>
         /// Gets the steps.
         /// </summary>
         /// <value>
@@ -42,14 +32,26 @@ namespace MaxFlowMinCut.Lib.History
         /// </value>
         public List<GraphHistoryStep> Steps { get; private set; }
 
+        /// <summary>
+        /// Gets the last step.
+        /// </summary>
+        /// <value>
+        /// The last step.
+        /// </value>
         public int LastStep
         {
             get
             {
-                return Steps.Count - 1;
+                return this.Steps.Count - 1;
             }
         }
 
+        /// <summary>
+        /// Gets the first step.
+        /// </summary>
+        /// <value>
+        /// The first step.
+        /// </value>
         public int FirstStep
         {
             get
@@ -59,9 +61,42 @@ namespace MaxFlowMinCut.Lib.History
         }
 
         /// <summary>
+        /// Gets the <see cref="Graph"/> at the specified index.
+        /// </summary>
+        /// <value>
+        /// The <see cref="Graph"/>.
+        /// </value>
+        /// <param name="index">
+        /// The index.
+        /// </param>
+        /// <returns>
+        /// The <see cref="GraphHistoryStep"/>.
+        /// </returns>
+        public GraphHistoryStep this[int index]
+        {
+            get
+            {
+                return this.Steps[index];
+            }
+        }
+
+        /// <summary>
+        /// The get enumerator.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="IEnumerator"/>.
+        /// </returns>
+        public IEnumerator GetEnumerator()
+        {
+            return this.Steps.GetEnumerator();
+        }
+
+        /// <summary>
         /// Adds the graph step.
         /// </summary>
-        /// <param name="flowGraph">The flow graph.</param>
+        /// <param name="flowGraph">
+        /// The flow graph.
+        /// </param>
         public void AddGraphStep(Graph flowGraph)
         {
             this.AddGraphStep(flowGraph, null);
@@ -70,8 +105,12 @@ namespace MaxFlowMinCut.Lib.History
         /// <summary>
         /// Adds the graph step.
         /// </summary>
-        /// <param name="flowGraph">The flow graph.</param>
-        /// <param name="residualGraph">The residual graph.</param>
+        /// <param name="flowGraph">
+        /// The flow graph.
+        /// </param>
+        /// <param name="residualGraph">
+        /// The residual graph.
+        /// </param>
         public void AddGraphStep(Graph flowGraph, Graph residualGraph)
         {
             if (residualGraph != null)
@@ -82,17 +121,6 @@ namespace MaxFlowMinCut.Lib.History
             {
                 this.Steps.Add(new GraphHistoryStep((Graph)flowGraph.Clone()));
             }
-        }
-
-        /// <summary>
-        /// Gibt einen Enumerator zurück, der eine Auflistung durchläuft.
-        /// </summary>
-        /// <returns>
-        /// Ein <see cref="T:System.Collections.IEnumerator" />-Objekt, das zum Durchlaufen der Auflistung verwendet werden kann.
-        /// </returns>
-        public IEnumerator GetEnumerator()
-        {
-            return Steps.GetEnumerator();
         }
     }
 }

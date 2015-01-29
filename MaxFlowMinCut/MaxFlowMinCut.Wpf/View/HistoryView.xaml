@@ -9,7 +9,7 @@
         Title="HistoryView" Height="600" Width="700">
     <Grid>
         <userControl:DependencyGraphWrapper Grid.Column="0" FlowGraph="{Binding FlowGraph}" Height="300"
-                                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
     </Grid>
 </Window>
