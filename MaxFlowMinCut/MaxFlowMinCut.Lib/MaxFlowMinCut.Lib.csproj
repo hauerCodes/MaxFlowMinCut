@@ -46,7 +46,9 @@
   <ItemGroup>
     <Compile Include="History\GraphHistoryStep.cs" />
     <Compile Include="Network\Edge.cs" />
-    <Compile Include="Algorithm\FordFulkerson.cs" />
+    <Compile Include="Algorithm\FordFulkerson.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Network\Graph.cs" />
     <Compile Include="History\GraphHistory.cs" />
     <Compile Include="Network\Node.cs" />

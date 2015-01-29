@@ -1,59 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
+// </copyright>
+// <summary>
+//   Interaction logic for MainWindow.xaml.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace MaxFlowMinCut.Wpf.View
 {
+    using System.Windows;
+
+    using MaxFlowMinCut.Lib;
     using MaxFlowMinCut.Wpf.ViewModel;
     using MaxFlowMinCut.Wpf.Visualizer;
 
-    using Microsoft.Msagl.Drawing;
-
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel viewModel;
+        /// <summary>
+        /// The view model.
+        /// </summary>
+        private readonly MainWindowViewModel viewModel;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.viewModel = (MainWindowViewModel)this.DataContext;
             this.viewModel.FlowGraphChanged += this.OnFlowGraphChanged;
             this.viewModel.ResidualGraphChanged += this.OnResidualGraphChanged;
         }
 
-        private void OnFlowGraphChanged(object sender, Lib.Graph libGraph)
+        /// <summary>
+        /// The on flow graph changed.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="libGraph">
+        /// The lib graph.
+        /// </param>
+        private void OnFlowGraphChanged(object sender, Graph libGraph)
         {
-            //var oldGraph = this.GViewerFlow.Graph;
+            // var oldGraph = this.GViewerFlow.Graph;
 
             ////oldGraph.FindNode("a").Attr.Pos;
-            
-            VisualGraph visualGraph = new VisualGraph(libGraph);
-            Graph msaglGraph = visualGraph.CreateFlowGraph();
-            //this.GViewerFlow.NeedToCalculateLayout = true;
+            var visualGraph = new VisualGraph(libGraph);
+            var msaglGraph = visualGraph.CreateFlowGraph();
+
+            // this.GViewerFlow.NeedToCalculateLayout = true;
             this.GViewerFlow.Graph = msaglGraph;
-            //this.GViewerFlow.NeedToCalculateLayout = false;
+
+            // this.GViewerFlow.NeedToCalculateLayout = false;
         }
 
-        private void OnResidualGraphChanged(object sender, Lib.Graph libGraph)
+        /// <summary>
+        /// The on residual graph changed.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="libGraph">
+        /// The lib graph.
+        /// </param>
+        private void OnResidualGraphChanged(object sender, Graph libGraph)
         {
             if (libGraph != null)
             {
-                VisualGraph visualGraph = new VisualGraph(libGraph);
-                Graph msaglGraph = visualGraph.CreateResidualGraph();
+                var visualGraph = new VisualGraph(libGraph);
+                var msaglGraph = visualGraph.CreateResidualGraph();
                 this.GViewerResidual.Graph = msaglGraph;
             }
             else

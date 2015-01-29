@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="HistoryView.xaml.cs" company="FH Wr. Neustadt">
+//   Christoph Hauer / Markus Zytek. All rights reserved.
+// </copyright>
+// <summary>
+//   Interaktionslogik für HistoryView.xaml.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 namespace MaxFlowMinCut.Wpf.View
 {
+    using System.Windows;
+
     /// <summary>
-    /// Interaktionslogik für HistoryView.xaml
+    /// The history view.
     /// </summary>
     public partial class HistoryView : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HistoryView"/> class.
+        /// </summary>
         public HistoryView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

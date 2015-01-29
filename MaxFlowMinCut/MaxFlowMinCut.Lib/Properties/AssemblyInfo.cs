@@ -1,13 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AssemblyInfo.cs" company="FH Wr. Neustadt">
-//   Christoph Hauer & Markus Zytek
+//   Christoph Hauer / Markus Zytek. All rights reserved.
 // </copyright>
 // <summary>
 //   AssemblyInfo.cs
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
-
 
 using System.Reflection;
 using System.Runtime.InteropServices;
