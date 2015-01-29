@@ -25,17 +25,99 @@ namespace MaxFlowMinCut.Wpf.ViewModel
     using MaxFlowMinCut.Wpf.Visualizer;
     using MaxFlowMinCut.Lib;
     using MaxFlowMinCut.Lib.Algorithm;
+    using MaxFlowMinCut.Lib.History;
+
+    using Mutzl.MvvmLight;
+
+    using Application = System.Windows.Application;
 
     /// <summary>
     /// The main window view model.
     /// </summary>
     internal class MainWindowViewModel : ViewModelBase
     {
-        public ObservableCollection<InputEdge> InputEdges { get; set; }
+        /// <summary>
+        /// The visualized graph
+        /// </summary>
+        private Graph visualizedGraph;
+
+        /// <summary>
+        /// The current step
+        /// </summary>
+        private int currentStep = 0;
+
+        /// <summary>
+        /// The graph steps history.
+        /// </summary>
+        private GraphHistory graphSteps;
 
         public MainWindowViewModel()
         {
+            InitializeGraph();
+            InitializeCommands();
+        }
+
+        private void InitializeCommands()
+        {
+            this.VisualizeFlowGraphCommand = new RelayCommand(
+                this.ExecuteVisualizeFlowGraph,
+                this.CanExecuteVisualizeFlowGraphCommand);
+
+            this.CalculateCommand = new DependentRelayCommand(
+                this.ExecuteCalculateGraph,
+                () => this.IsVisualized,
+                this,
+                () => this.IsVisualized);
+
+            this.ClearGraphCommand = new RelayCommand(
+                this.ExecuteClearGraph);
+
+            this.StepForwardCommand = new DependentRelayCommand(
+                this.ExecuteVisualizeNextGraphStep,
+                () => this.IsCalculated,
+                this,
+                () => this.IsCalculated);
+        }
+
+        /// <summary>
+        /// Executes the visualize next graph step.
+        /// </summary>
+        private void ExecuteVisualizeNextGraphStep()
+        {
+            if (currentStep < graphSteps.MaxStep)
+            {
+                RaiseFlowGraphChanged(this, graphSteps[currentStep].FlowGraph);
+                RaiseResidualGraphChanged(this, graphSteps[currentStep].ResidualGraph);
+                currentStep++;
+            }
+        }
+
+        /// <summary>
+        /// Clears the graph.
+        /// </summary>
+        private void ExecuteClearGraph()
+        {
+            this.InputEdges.Clear();
+            this.IsVisualized = false;
+        }
+
+        private void ExecuteCalculateGraph()
+        {
+            FordFulkerson fordFulkerson = new FordFulkerson(visualizedGraph, "s", "t");
+            //this.RaiseResidualGraphChanged(this, graph);
+
+            graphSteps = fordFulkerson.RunAlgorithm();
+            IsCalculated = true;
+        }
+
+        private void InitializeGraph()
+        {
             this.InputEdges = new ObservableCollection<InputEdge>();
+            this.InputEdges.CollectionChanged += (sender, e) =>
+            {
+                this.IsVisualized = false;
+                this.IsCalculated = false;
+            };
 
             // TEST-GRAPH
             this.InputEdges.Add(new InputEdge("s", "2", 10));
@@ -47,24 +129,39 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.InputEdges.Add(new InputEdge("4", "t", 10));
             this.InputEdges.Add(new InputEdge("5", "4", 6));
             this.InputEdges.Add(new InputEdge("5", "t", 10));
-
-            this.VisualizeFlowGraphCommand = new RelayCommand(
-                this.VisualizeFlowGraph,
-                this.CanExecuteVisualizeFlowGraphCommand);
         }
+
+        public bool IsVisualized { get; private set; }
+
+        public bool IsCalculated { get; private set; }
+
+        public RelayCommand PlayStepsCommand { get; private set; }
+        public RelayCommand StopCommand { get; private set; }
+        public DependentRelayCommand StepForwardCommand { get; private set; }
+        public RelayCommand StepBackCommand { get; private set; }
+        public RelayCommand GoToStartCommand { get; private set; }
+        public RelayCommand GoToEndCommand { get; private set; }
+        public RelayCommand ClearGraphCommand { get; private set; }
+        public DependentRelayCommand CalculateCommand { get; private set; }
+        public RelayCommand VisualizeFlowGraphCommand { get; private set; }
+
+        public ObservableCollection<InputEdge> InputEdges { get; private set; }
+
 
         private bool CanExecuteVisualizeFlowGraphCommand()
         {
             return this.InputEdges.Count > 0;
         }
 
-        private void VisualizeFlowGraph()
+        private void ExecuteVisualizeFlowGraph()
         {
-            Graph graph = ConvertInputEdgesToGraph(this.InputEdges);
-            this.RaiseFlowGraphChanged(this, graph);
+            visualizedGraph = ConvertInputEdgesToGraph(this.InputEdges);
+            this.RaiseFlowGraphChanged(this, visualizedGraph);
 
-            FordFulkerson fordFulkerson = new FordFulkerson(graph, "s", "t");
-            this.RaiseResidualGraphChanged(this, fordFulkerson.flowGraph);
+            this.IsVisualized = true;
+
+            //FordFulkerson fordFulkerson = new FordFulkerson(graph, "s", "t");
+            //this.RaiseResidualGraphChanged(this, graph);
         }
 
         private static Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
@@ -95,8 +192,6 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             return graph;
         }
 
-        public RelayCommand VisualizeFlowGraphCommand { get; set; }
-
         /// <summary>
         /// The flow graph changed.
         /// </summary>
@@ -120,7 +215,10 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         {
             if (this.FlowGraphChanged != null)
             {
-                this.FlowGraphChanged(sender, graph);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    this.FlowGraphChanged(sender, graph);
+                });
             }
         }
 
@@ -137,7 +235,10 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         {
             if (this.ResidualGraphChanged != null)
             {
-                this.ResidualGraphChanged(sender, graph);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    this.ResidualGraphChanged(sender, graph);
+                });
             }
         }
     }

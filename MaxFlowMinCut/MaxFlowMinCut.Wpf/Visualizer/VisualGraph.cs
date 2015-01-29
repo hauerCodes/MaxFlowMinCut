@@ -33,9 +33,13 @@ namespace MaxFlowMinCut.Wpf.Visualizer
 
             foreach (var edge in this.libGraph.Edges)
             {
-                msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}/{1}", edge.Flow, edge.Capacity), edge.NodeTo.Name);
+                var addedge = msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}/{1}", edge.Flow, edge.Capacity), edge.NodeTo.Name);
+                addedge.Attr.Color = new Color(edge.Foreground.R, edge.Foreground.G, edge.Foreground.B);
+                addedge.Attr.LineWidth = edge.Thickness;
+                addedge.SourceNode.Attr.Shape = Shape.Circle;
+                addedge.TargetNode.Attr.Shape = Shape.Circle;
             }
-
+            
             return msaglGraph;
         }
 
@@ -45,7 +49,10 @@ namespace MaxFlowMinCut.Wpf.Visualizer
 
             foreach (var edge in this.libGraph.Edges)
             {
-                msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}", edge.Capacity), edge.NodeTo.Name);
+                var addedge = msaglGraph.AddEdge(edge.NodeFrom.Name, string.Format("{0}", edge.Capacity), edge.NodeTo.Name);
+                addedge.Attr.Color = new Color(edge.Foreground.R, edge.Foreground.G, edge.Foreground.B);
+                addedge.SourceNode.Attr.Shape = Shape.Circle;
+                addedge.TargetNode.Attr.Shape = Shape.Circle;
             }
 
             return msaglGraph;

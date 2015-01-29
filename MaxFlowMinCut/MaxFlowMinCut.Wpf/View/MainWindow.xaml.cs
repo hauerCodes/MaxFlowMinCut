@@ -39,16 +39,23 @@ namespace MaxFlowMinCut.Wpf.View
         {
             VisualGraph visualGraph = new VisualGraph(libGraph);
             Graph msaglGraph = visualGraph.CreateFlowGraph();
-            this.GViewerFlow.NeedToCalculateLayout = true;
+            //this.GViewerFlow.NeedToCalculateLayout = true;
             this.GViewerFlow.Graph = msaglGraph;
-            this.GViewerFlow.NeedToCalculateLayout = false;
+            //this.GViewerFlow.NeedToCalculateLayout = false;
         }
 
         private void OnResidualGraphChanged(object sender, Lib.Graph libGraph)
         {
-            VisualGraph visualGraph = new VisualGraph(libGraph);
-            Graph msaglGraph = visualGraph.CreateFlowGraph();
-            this.GViewerResidual.Graph = msaglGraph;
+            if (libGraph != null)
+            {
+                VisualGraph visualGraph = new VisualGraph(libGraph);
+                Graph msaglGraph = visualGraph.CreateResidualGraph();
+                this.GViewerResidual.Graph = msaglGraph;
+            }
+            else
+            {
+                this.GViewerResidual.Graph = null;
+            }
         }
     }
 }
