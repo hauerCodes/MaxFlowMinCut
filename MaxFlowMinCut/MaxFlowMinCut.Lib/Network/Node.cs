@@ -10,6 +10,7 @@ namespace MaxFlowMinCut.Lib.Network
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Runtime.CompilerServices;
 
     /// <summary>
@@ -22,6 +23,8 @@ namespace MaxFlowMinCut.Lib.Network
         {
             this.Name = name;
             this.Edges = new List<Edge>();
+            this.Foreground = Color.Black;
+            this.Fill = Color.White;
         }
 
         public List<Edge> Edges { get; set; }
@@ -29,5 +32,9 @@ namespace MaxFlowMinCut.Lib.Network
         public string Name { get; set; }
 
         public Node ParentNode { get; set; }
+
+        public Color Foreground { get; set; }
+
+        public Color Fill { get; set; }
     }
 }
