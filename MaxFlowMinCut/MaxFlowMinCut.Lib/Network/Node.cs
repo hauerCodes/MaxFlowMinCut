@@ -21,11 +21,12 @@ namespace MaxFlowMinCut.Lib.Network
     {
         public Node(string name)
         {
+            this.ID = Guid.NewGuid();
             this.Name = name;
             this.Edges = new List<Edge>();
-            this.Foreground = Color.Black;
-            this.Fill = Color.White;
         }
+
+        public Guid ID { get; set; }
 
         public List<Edge> Edges { get; set; }
 
@@ -33,8 +34,17 @@ namespace MaxFlowMinCut.Lib.Network
 
         public Node ParentNode { get; set; }
 
-        public Color Foreground { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is minimum cut.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is minimum cut; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsMinCut { get; set; }
 
-        public Color Fill { get; set; }
+        public bool Equals(Node compareNode)
+        {
+            return this.ID.Equals(compareNode.ID); 
+        }
     }
 }
