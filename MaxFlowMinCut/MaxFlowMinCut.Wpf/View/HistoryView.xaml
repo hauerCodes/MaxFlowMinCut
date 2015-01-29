@@ -8,14 +8,8 @@
         AllowsTransparency="False"
         Title="HistoryView" Height="600" Width="700">
     <Grid>
-
-        <ListView ItemsSource="{Binding History.Steps}">
-            <ListView.ItemTemplate>
-                <DataTemplate >
-                    <userControl:DependencyGraphWrapper Grid.Column="0" FlowGraph="{Binding FlowGraph}" Height="300"
+        <userControl:DependencyGraphWrapper Grid.Column="0" FlowGraph="{Binding FlowGraph}" Height="300"
                                                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            </ListView>
+
     </Grid>
 </Window>
