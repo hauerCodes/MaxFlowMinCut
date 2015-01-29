@@ -14,8 +14,8 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="25*"/>
-            <ColumnDefinition Width="75*"/>
+            <ColumnDefinition Width="210"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" Grid.RowSpan="3">
             <Grid.RowDefinitions>
@@ -29,30 +29,30 @@
                         <RowDefinition/>
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <DataGrid Grid.Row="0" ItemsSource="{Binding InputEdges, Mode=TwoWay}" AutoGenerateColumns="False" HeadersVisibility="All" CanUserAddRows="True" CanUserDeleteRows="True" CanUserResizeRows="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="From" Binding="{Binding NodeFrom}" Width="40"/>
-                        <DataGridTextColumn Header="To" Binding="{Binding NodeTo}" Width="40"/>
-                        <DataGridTextColumn Header="Capacity" Binding="{Binding Capacity}" Width="Auto"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    <DataGrid Grid.Row="0" ItemsSource="{Binding InputEdges, Mode=TwoWay}" AutoGenerateColumns="False" HeadersVisibility="All" CanUserAddRows="True" CanUserDeleteRows="True" CanUserResizeRows="False" HorizontalScrollBarVisibility="Disabled">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="From" Binding="{Binding NodeFrom}" Width="50" />
+                            <DataGridTextColumn Header="To" Binding="{Binding NodeTo}" Width="50" />
+                            <DataGridTextColumn Header="Capacity" Binding="{Binding Capacity}" Width="60"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <StackPanel Grid.Row="1">
-                    <Button  Command="{Binding VisualizeFlowGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Visualize Input Graph"/>
-                        <Button  Command="{Binding CalculateCommand}" Margin="5" VerticalAlignment="Bottom" Content="Calculate"/>
-                    <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Clear Graph"/>
-                        <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Load Graph"/>
-                        <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Save Graph"/>
+                        <Button  Command="{Binding VisualizeCommand}" Margin="5" VerticalAlignment="Bottom" Content="Visualize Input Graph"/>
+                        <Button  Command="{Binding CalculateCommand}" Margin="5" VerticalAlignment="Bottom" Content="Calculate Ford Fulkerson"/>
                         <Button  Command="{Binding ShowGraphHistoryCommand}" Margin="5" VerticalAlignment="Bottom" Content="Show Graph History"/>
+                        <Button  Command="{Binding ClearGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Clear Graph"/>
+                        <Button  Command="{Binding LoadGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Load Graph"/>
+                        <Button  Command="{Binding SaveGraphCommand}" Margin="5" VerticalAlignment="Bottom" Content="Save Graph"/>
                     </StackPanel>
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="0" Header="Graph-Output" FontWeight="DemiBold" Margin="5" Padding="5">
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="Max-Flow:"/>
-                    <TextBox Text="0" HorizontalContentAlignment="Right"/>
+                    <TextBox Text="{Binding MaxFlow}" HorizontalContentAlignment="Right" IsEnabled="False"/>
                     <TextBlock/>
                     <TextBlock Text="Min-Cut:" />
-                    <TextBox Text="0" HorizontalContentAlignment="Right"/>
+                    <TextBox Text="{Binding MinCut}" HorizontalContentAlignment="Right" IsEnabled="False"/>
 
                 </StackPanel>
             </GroupBox>
@@ -62,18 +62,18 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
+                <!--<ColumnDefinition/>-->
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="❚◀◀"/>
-            <Button Grid.Column="1" Content="◀◀"/>
-            <Button Grid.Column="2" Content="▶"/>
-            <Button Grid.Column="3" Content="❚❚"/>
-            <Button Grid.Column="4" Content="■"/>
-            <Button Grid.Column="5" Content="▶▶" Command="{Binding StepForwardCommand}"/>
-            <Button Grid.Column="6" Content="▶▶❚"/>
+            <Button Grid.Column="0" Content="❚◀◀" Command="{Binding FirstStepCommand}"/>
+            <Button Grid.Column="1" Content="◀◀" Command="{Binding StepBackwardCommand}"/>
+            <Button Grid.Column="2" Content="▶" Command="{Binding PlayStepsCommand}"/>
+            <Button Grid.Column="3" Content="❚❚" Command="{Binding PauseStepsCommand}"/>
+            <!--<Button Grid.Column="4" Content="■"/>-->
+            <Button Grid.Column="4" Content="▶▶" Command="{Binding StepForwardCommand}"/>
+            <Button Grid.Column="5" Content="▶▶❚" Command="{Binding LastStepCommand}"/>
         </Grid>
         <WindowsFormsHost Grid.Row="0" Grid.Column="1" Name="windowsFormsHostFlowGraph">
             <gv:GViewer x:Name="GViewerFlow" ToolBarIsVisible="False" CurrentLayoutMethod="SugiyamaScheme"/>

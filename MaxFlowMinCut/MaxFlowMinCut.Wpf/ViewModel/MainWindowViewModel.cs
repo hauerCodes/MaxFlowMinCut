@@ -11,26 +11,25 @@ namespace MaxFlowMinCut.Wpf.ViewModel
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
+    using System.IO;
     using System.Linq;
-    using System.Runtime.CompilerServices;
-    using System.Windows.Forms;
-    using System.Windows.Input;
+    using System.Windows;
+    using System.Windows.Threading;
+    using System.Xml.Serialization;
 
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.CommandWpf;
 
-    using MaxFlowMinCut.Lib.Network;
-    using MaxFlowMinCut.Wpf.Model;
-    using MaxFlowMinCut.Wpf.Visualizer;
     using MaxFlowMinCut.Lib;
     using MaxFlowMinCut.Lib.Algorithm;
     using MaxFlowMinCut.Lib.History;
+    using MaxFlowMinCut.Lib.Network;
+    using MaxFlowMinCut.Wpf.Model;
     using MaxFlowMinCut.Wpf.View;
 
-    using Mutzl.MvvmLight;
+    using Microsoft.Win32;
 
-    using Application = System.Windows.Application;
+    using Mutzl.MvvmLight;
 
     /// <summary>
     /// The main window view model.
@@ -38,60 +37,541 @@ namespace MaxFlowMinCut.Wpf.ViewModel
     internal class MainWindowViewModel : ViewModelBase
     {
         /// <summary>
-        /// The visualized graph
+        /// The current step.
         /// </summary>
-        private Graph visualizedGraph;
-
-        /// <summary>
-        /// The current step
-        /// </summary>
-        private int currentStep = 0;
+        private int currentStep;
 
         /// <summary>
         /// The graph steps history.
         /// </summary>
         private GraphHistory graphSteps;
 
+        /// <summary>
+        /// The input edges.
+        /// </summary>
+        private ObservableCollection<InputEdge> inputEdges = new ObservableCollection<InputEdge>();
+
+        /// <summary>
+        /// The play steps dispatcher timer.
+        /// </summary>
+        private DispatcherTimer playStepsDispatcherTimer;
+
+        /// <summary>
+        /// The visualized graph.
+        /// </summary>
+        private Graph visualizedGraph;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
+        /// </summary>
         public MainWindowViewModel()
         {
-            InitializeGraph();
-            InitializeCommands();
+            this.InitializeFields();
+            this.InitializeGraph();
+            this.InitializeCommands();
         }
 
+        /// <summary>
+        /// Gets a value indicating whether is visualized.
+        /// </summary>
+        /// <value>
+        /// The is visualized.
+        /// </value>
+        public bool IsVisualized { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether is calculated.
+        /// </summary>
+        /// <value>
+        /// The is calculated.
+        /// </value>
+        public bool IsCalculated { get; private set; }
+
+        /// <summary>
+        /// Gets the play steps command.
+        /// </summary>
+        /// <value>
+        /// The play steps command.
+        /// </value>
+        public RelayCommand PlayStepsCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the stop command.
+        /// </summary>
+        /// <value>
+        /// The stop command.
+        /// </value>
+        public RelayCommand StopCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the step forward command.
+        /// </summary>
+        /// <value>
+        /// The step forward command.
+        /// </value>
+        public RelayCommand StepForwardCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the step backward command.
+        /// </summary>
+        /// <value>
+        /// The step backward command.
+        /// </value>
+        public RelayCommand StepBackwardCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the go to start command.
+        /// </summary>
+        /// <value>
+        /// The go to start command.
+        /// </value>
+        public RelayCommand GoToStartCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the go to end command.
+        /// </summary>
+        /// <value>
+        /// The go to end command.
+        /// </value>
+        public RelayCommand GoToEndCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the clear graph command.
+        /// </summary>
+        /// <value>
+        /// The clear graph command.
+        /// </value>
+        public RelayCommand ClearGraphCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the calculate command.
+        /// </summary>
+        /// <value>
+        /// The calculate command.
+        /// </value>
+        public DependentRelayCommand CalculateCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the visualize command.
+        /// </summary>
+        /// <value>
+        /// The visualize command.
+        /// </value>
+        public RelayCommand VisualizeCommand { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the show graph history command.
+        /// </summary>
+        /// <value>
+        /// The show graph history command.
+        /// </value>
+        public DependentRelayCommand ShowGraphHistoryCommand { get; set; }
+
+        /// <summary>
+        /// Gets the input edges.
+        /// </summary>
+        /// <value>
+        /// The input edges.
+        /// </value>
+        public ObservableCollection<InputEdge> InputEdges
+        {
+            get
+            {
+                return this.inputEdges;
+            }
+
+            set
+            {
+                this.inputEdges = value;
+                this.IsVisualized = false;
+                this.IsCalculated = false;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the flow graph.
+        /// </summary>
+        /// <value>
+        /// The flow graph.
+        /// </value>
+        public Graph FlowGraph { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last step command.
+        /// </summary>
+        /// <value>
+        /// The last step command.
+        /// </value>
+        public RelayCommand LastStepCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pause steps command.
+        /// </summary>
+        /// <value>
+        /// The pause steps command.
+        /// </value>
+        public RelayCommand PauseStepsCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the first step command.
+        /// </summary>
+        /// <value>
+        /// The first step command.
+        /// </value>
+        public RelayCommand FirstStepCommand { get; set; }
+
+        /// <summary>
+        /// Gets the max flow.
+        /// </summary>
+        /// <value>
+        /// The max flow.
+        /// </value>
+        public int MaxFlow { get; private set; }
+
+        /// <summary>
+        /// Gets the min cut.
+        /// </summary>
+        /// <value>
+        /// The min cut.
+        /// </value>
+        public int MinCut { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the load graph command.
+        /// </summary>
+        /// <value>
+        /// The load graph command.
+        /// </value>
+        public RelayCommand LoadGraphCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the save graph command.
+        /// </summary>
+        /// <value>
+        /// The save graph command.
+        /// </value>
+        public RelayCommand SaveGraphCommand { get; set; }
+
+        /// <summary>
+        /// The initialize fields.
+        /// </summary>
+        private void InitializeFields()
+        {
+            this.playStepsDispatcherTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 1) };
+            this.playStepsDispatcherTimer.Tick += this.PlayStepsDispatcherTimerOnTick;
+        }
+
+        /// <summary>
+        /// The initialize commands.
+        /// </summary>
         private void InitializeCommands()
         {
-            this.VisualizeFlowGraphCommand = new RelayCommand(
-                this.ExecuteVisualizeFlowGraph,
-                this.CanExecuteVisualizeFlowGraphCommand);
+            this.VisualizeCommand = new RelayCommand(this.ExecuteVisualizeGraph, this.CanExecuteVisualizeCommand);
 
             this.CalculateCommand = new DependentRelayCommand(
-                this.ExecuteCalculateGraph,
-                () => this.IsVisualized,
-                this,
+                this.ExecuteCalculateGraph, 
+                this.CanExecuteCalculateCommand, 
+                this, 
                 () => this.IsVisualized);
 
-            this.ClearGraphCommand = new RelayCommand(
-                this.ExecuteClearGraph);
+            this.ClearGraphCommand = new RelayCommand(this.ExecuteClearGraph);
 
-            this.StepForwardCommand = new DependentRelayCommand(
-                this.ExecuteVisualizeNextGraphStep,
-                () => this.IsCalculated,
-                this,
-                () => this.IsCalculated);
+            this.LoadGraphCommand = new RelayCommand(this.ExecuteLoadGraph, this.CanExecuteLoadGraphCommand);
+
+            this.SaveGraphCommand = new RelayCommand(this.ExecuteSaveGraph, this.CanExecuteSaveGraphCommand);
+
+            this.FirstStepCommand = new RelayCommand(
+                this.ExecuteVisualizeFirstGraphStep, 
+                this.CanExecuteFirstStepCommand);
+
+            this.StepForwardCommand = new RelayCommand(
+                this.ExecuteVisualizeNextGraphStep, 
+                this.CanExecuteStepForewardCommand);
+
+            this.PlayStepsCommand = new RelayCommand(this.ExecutePlaySteps, this.CanExecutePlayStepsCommand);
+
+            this.PauseStepsCommand = new RelayCommand(this.ExecutePauseSteps, this.CanExecutePauseStepsCommand);
+
+            this.StepBackwardCommand = new RelayCommand(
+                this.ExecuteVisualizePreviousGraphStep, 
+                this.CanExecuteStepBackwardCommand);
+
+            this.LastStepCommand = new RelayCommand(this.ExecuteVisualizeLastGraphStep, this.CanExecuteLastStepCommand);
 
             this.ShowGraphHistoryCommand = new DependentRelayCommand(
-                this.ExecuteShowGraphHistory,
-            () => this.IsCalculated,
-            this,
-            () => this.IsCalculated);
+                this.ExecuteShowGraphHistory, 
+                this.CanExecuteShowGraphHistoryCommand, 
+                this, 
+                () => this.IsCalculated);
         }
 
+        /// <summary>
+        /// The execute save graph.
+        /// </summary>
+        private void ExecuteSaveGraph()
+        {
+            var saveFileDialog = new SaveFileDialog();
+
+            saveFileDialog.DefaultExt = ".xml";
+            saveFileDialog.Filter = "XML-Documents (.xml)|*.xml";
+
+            saveFileDialog.ShowDialog();
+            var fileName = saveFileDialog.FileName;
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            try
+            {
+                var xmlSerializer = new XmlSerializer(this.InputEdges.GetType());
+                using (var fileStream = new FileStream(fileName, FileMode.Create))
+                {
+                    xmlSerializer.Serialize(fileStream, this.InputEdges);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
+            }
+        }
+
+        /// <summary>
+        /// The can execute save graph command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteSaveGraphCommand()
+        {
+            return this.InputEdges.Count > 0;
+        }
+
+        /// <summary>
+        /// The execute load graph.
+        /// </summary>
+        private void ExecuteLoadGraph()
+        {
+            var openFileDialog = new OpenFileDialog();
+
+            openFileDialog.Multiselect = false;
+            openFileDialog.DefaultExt = ".xml";
+            openFileDialog.Filter = "XML-Documents (.xml)|*.xml";
+
+            openFileDialog.ShowDialog();
+            var fileName = openFileDialog.FileName;
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            try
+            {
+                var xmlSerializer = new XmlSerializer(this.InputEdges.GetType());
+                using (var fileStream = new FileStream(fileName, FileMode.Open))
+                {
+                    this.InputEdges = (ObservableCollection<InputEdge>)xmlSerializer.Deserialize(fileStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
+            }
+        }
+
+        /// <summary>
+        /// The can execute load graph command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteLoadGraphCommand()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// The can execute show graph history command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteShowGraphHistoryCommand()
+        {
+            return this.IsVisualized && this.IsCalculated && !this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The can execute calculate command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteCalculateCommand()
+        {
+            var inputEdgesContainsSource = this.InputEdges.Any(e => e.NodeFrom.Equals("s"));
+            var inputEdgesContainsTarget = this.InputEdges.Any(e => e.NodeTo.Equals("t"));
+
+            return this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled && inputEdgesContainsSource
+                   && inputEdgesContainsTarget;
+        }
+
+        /// <summary>
+        /// The can execute pause steps command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecutePauseStepsCommand()
+        {
+            return this.IsVisualized && this.IsCalculated && this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The execute pause steps.
+        /// </summary>
+        private void ExecutePauseSteps()
+        {
+            this.playStepsDispatcherTimer.Stop();
+        }
+
+        /// <summary>
+        /// The can execute play steps command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecutePlayStepsCommand()
+        {
+            return this.IsVisualized && this.IsCalculated && !this.playStepsDispatcherTimer.IsEnabled
+                   && this.currentStep < this.graphSteps.LastStep;
+        }
+
+        /// <summary>
+        /// The execute play steps.
+        /// </summary>
+        private void ExecutePlaySteps()
+        {
+            this.playStepsDispatcherTimer.Start();
+        }
+
+        /// <summary>
+        /// The play steps dispatcher timer on tick.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="eventArgs">
+        /// The event args.
+        /// </param>
+        private void PlayStepsDispatcherTimerOnTick(object sender, EventArgs eventArgs)
+        {
+            if (this.currentStep < this.graphSteps.LastStep)
+            {
+                this.currentStep++;
+                this.RaiseFlowAndResidualGraphChanged(this);
+            }
+            else
+            {
+                this.playStepsDispatcherTimer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// The can execute last step command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteLastStepCommand()
+        {
+            return this.IsCalculated && this.IsVisualized && this.currentStep < this.graphSteps.LastStep
+                   && !this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The execute visualize last graph step.
+        /// </summary>
+        private void ExecuteVisualizeLastGraphStep()
+        {
+            this.currentStep = this.graphSteps.LastStep;
+            this.RaiseFlowAndResidualGraphChanged(this);
+        }
+
+        /// <summary>
+        /// The can execute first step command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteFirstStepCommand()
+        {
+            return this.IsCalculated && this.IsVisualized && this.currentStep > this.graphSteps.FirstStep
+                   && !this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The execute visualize first graph step.
+        /// </summary>
+        private void ExecuteVisualizeFirstGraphStep()
+        {
+            this.currentStep = this.graphSteps.FirstStep;
+            this.RaiseFlowAndResidualGraphChanged(this);
+        }
+
+        /// <summary>
+        /// The can execute step foreward command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteStepForewardCommand()
+        {
+            return this.IsCalculated && this.IsVisualized && this.currentStep < this.graphSteps.LastStep
+                   && !this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The can execute step backward command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteStepBackwardCommand()
+        {
+            return this.IsCalculated && this.IsVisualized && this.currentStep > this.graphSteps.FirstStep
+                   && !this.playStepsDispatcherTimer.IsEnabled;
+        }
+
+        /// <summary>
+        /// The execute visualize previous graph step.
+        /// </summary>
+        private void ExecuteVisualizePreviousGraphStep()
+        {
+            this.currentStep--;
+            this.RaiseFlowAndResidualGraphChanged(this);
+        }
+
+        /// <summary>
+        /// The raise flow and residual graph changed.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        private void RaiseFlowAndResidualGraphChanged(object sender)
+        {
+            this.RaiseFlowGraphChanged(sender, this.graphSteps[this.currentStep].FlowGraph);
+            this.RaiseResidualGraphChanged(sender, this.graphSteps[this.currentStep].ResidualGraph);
+        }
+
+        /// <summary>
+        /// The execute show graph history.
+        /// </summary>
         private void ExecuteShowGraphHistory()
         {
-            HistoryView view = new HistoryView 
-            {
-                DataContext = new HistoryViewModel(this.graphSteps)
-            };
+            var view = new HistoryView { DataContext = new HistoryViewModel(this.graphSteps) };
 
             view.Show();
         }
@@ -101,12 +581,8 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </summary>
         private void ExecuteVisualizeNextGraphStep()
         {
-            if (currentStep < graphSteps.MaxStep)
-            {
-                RaiseFlowGraphChanged(this, graphSteps[currentStep].FlowGraph);
-                RaiseResidualGraphChanged(this, graphSteps[currentStep].ResidualGraph);
-                currentStep++;
-            }
+            this.currentStep++;
+            this.RaiseFlowAndResidualGraphChanged(this);
         }
 
         /// <summary>
@@ -118,23 +594,33 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.IsVisualized = false;
         }
 
+        /// <summary>
+        /// The execute calculate graph.
+        /// </summary>
         private void ExecuteCalculateGraph()
         {
-            FordFulkerson fordFulkerson = new FordFulkerson(visualizedGraph, "s", "t");
-            //this.RaiseResidualGraphChanged(this, graph);
+            var fordFulkerson = new FordFulkerson(this.visualizedGraph, "s", "t");
 
-            graphSteps = fordFulkerson.RunAlgorithm();
-            IsCalculated = true;
+            this.graphSteps = fordFulkerson.RunAlgorithm();
+            this.IsCalculated = true;
+            this.MaxFlow = fordFulkerson.MaxFlow;
+            this.MinCut = fordFulkerson.MinCut;
+
+            this.currentStep = 0;
+            this.RaiseFlowAndResidualGraphChanged(this);
         }
 
+        /// <summary>
+        /// The initialize graph.
+        /// </summary>
         private void InitializeGraph()
         {
             this.InputEdges = new ObservableCollection<InputEdge>();
             this.InputEdges.CollectionChanged += (sender, e) =>
-            {
-                this.IsVisualized = false;
-                this.IsCalculated = false;
-            };
+                {
+                    this.IsVisualized = false;
+                    this.IsCalculated = false;
+                };
 
             // TEST-GRAPH
             this.InputEdges.Add(new InputEdge("s", "2", 10));
@@ -160,44 +646,43 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.InputEdges.Add(new InputEdge("7", "t", 10));
         }
 
-        public bool IsVisualized { get; private set; }
-
-        public bool IsCalculated { get; private set; }
-
-        public RelayCommand PlayStepsCommand { get; private set; }
-        public RelayCommand StopCommand { get; private set; }
-        public DependentRelayCommand StepForwardCommand { get; private set; }
-        public RelayCommand StepBackCommand { get; private set; }
-        public RelayCommand GoToStartCommand { get; private set; }
-        public RelayCommand GoToEndCommand { get; private set; }
-        public RelayCommand ClearGraphCommand { get; private set; }
-        public DependentRelayCommand CalculateCommand { get; private set; }
-        public RelayCommand VisualizeFlowGraphCommand { get; private set; }
-
-        public DependentRelayCommand ShowGraphHistoryCommand { get; set; }
-
-        public ObservableCollection<InputEdge> InputEdges { get; private set; }
-
-
-        private bool CanExecuteVisualizeFlowGraphCommand()
+        /// <summary>
+        /// The can execute visualize command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CanExecuteVisualizeCommand()
         {
-            return this.InputEdges.Count > 0;
+            return this.InputEdges.Count > 0 && !this.playStepsDispatcherTimer.IsEnabled;
         }
 
-        private void ExecuteVisualizeFlowGraph()
+        /// <summary>
+        /// The execute visualize flow graph.
+        /// </summary>
+        private void ExecuteVisualizeGraph()
         {
-            visualizedGraph = ConvertInputEdgesToGraph(this.InputEdges);
-            this.RaiseFlowGraphChanged(this, visualizedGraph);
+            this.visualizedGraph = ConvertInputEdgesToGraph(this.InputEdges);
+            this.RaiseFlowGraphChanged(this, this.visualizedGraph);
 
             this.IsVisualized = true;
 
-            //FordFulkerson fordFulkerson = new FordFulkerson(graph, "s", "t");
-            //this.RaiseResidualGraphChanged(this, graph);
+            this.MinCut = 0;
+            this.MaxFlow = 0;
         }
 
+        /// <summary>
+        /// The convert input edges to graph.
+        /// </summary>
+        /// <param name="inputEdges">
+        /// The input edges.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Graph"/>.
+        /// </returns>
         private static Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
         {
-            Graph graph = new Graph();
+            var graph = new Graph();
 
             foreach (var inputEdge in inputEdges)
             {
@@ -246,10 +731,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         {
             if (this.FlowGraphChanged != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    this.FlowGraphChanged(sender, graph);
-                });
+                Application.Current.Dispatcher.Invoke(() => { this.FlowGraphChanged(sender, graph); });
             }
         }
 
@@ -266,10 +748,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         {
             if (this.ResidualGraphChanged != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    this.ResidualGraphChanged(sender, graph);
-                });
+                Application.Current.Dispatcher.Invoke(() => { this.ResidualGraphChanged(sender, graph); });
             }
         }
     }

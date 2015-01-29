@@ -42,17 +42,19 @@ namespace MaxFlowMinCut.Lib.History
         /// </value>
         public List<GraphHistoryStep> Steps { get; private set; }
 
-        /// <summary>
-        /// Gets the maximum step.
-        /// </summary>
-        /// <value>
-        /// The maximum step.
-        /// </value>
-        public int MaxStep
+        public int LastStep
         {
             get
             {
-                return Steps.Count;
+                return Steps.Count - 1;
+            }
+        }
+
+        public int FirstStep
+        {
+            get
+            {
+                return 0;
             }
         }
 
