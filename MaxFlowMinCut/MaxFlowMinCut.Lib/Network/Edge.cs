@@ -19,12 +19,13 @@ namespace MaxFlowMinCut.Lib.Network
     {
         public Edge(Node nodeFrom, Node nodeTo, int capacity)
         {
+            this.ID = Guid.NewGuid();
             this.NodeFrom = nodeFrom;
             this.NodeTo = nodeTo;
             this.Capacity = capacity;
-            this.Foreground = Color.Black;
-            this.Thickness = 1;
         }
+
+        public Guid ID { get; set; }
 
         public Node NodeFrom { get; set; }
 
@@ -36,8 +37,40 @@ namespace MaxFlowMinCut.Lib.Network
 
         public string Label { get; set; }
 
-        public Color Foreground { get; set; }
+        public bool IsPathMarked { get; set; }
 
-        public int Thickness{ get; set; }
+        public bool IsVisited
+        {
+            get
+            {
+                return Flow > 0;
+            }
+        }
+
+        public bool IsFullUsed
+        {
+            get
+            {
+                return (Flow == Capacity);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is minimum cut.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is minimum cut; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsMinCut { get; set; }
+
+        /// <summary>
+        /// Equalses the specified compare edge.
+        /// </summary>
+        /// <param name="compareEdge">The compare edge.</param>
+        /// <returns></returns>
+        public bool Equals(Edge compareEdge)
+        {
+            return this.ID.Equals(compareEdge.ID);
+        }
     }
 }

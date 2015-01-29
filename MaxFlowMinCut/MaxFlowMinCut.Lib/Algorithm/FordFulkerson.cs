@@ -149,7 +149,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
             Debug.WriteLine("Max-Flow: {0}", this.MaxFlow);
 
             // MIN-CUT
-            //this.FindMinCut(sourceNode);
+            this.FindMinCut(sourceNode);
+            graphHistory.AddGraphStep(this.flowGraph);
+
             Debug.WriteLine("Min-Cut: {0}", this.MinCut);
 
             Debug.WriteLine("Min-Cut-Nodes:");
@@ -168,7 +170,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// The current node.
         /// </param>
         /// <returns>
-        /// The <see cref="List"/>.
+        /// The <see cref="List"/> path.
         /// </returns>
         private static List<Edge> GetPath(Node currentNode)
         {
@@ -193,10 +195,16 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// <param name="minCapacity">
         /// The min capacity.
         /// </param>
-        private void AugmentedPath(IEnumerable<Edge> path, int minCapacity)
+        private void AugmentPath(IEnumerable<Edge> path, int minCapacity)
         {
             foreach (var edge in path)
             {
+                var flowEdge = this.flowGraph.Edges.FirstOrDefault(e => e.Equals(edge));
+
+                if(flowEdge != null){
+                    flowEdge.Flow += minCapacity;
+                }
+
                 edge.Capacity -= minCapacity;
                 var residualEdge = edge.NodeTo.Edges.Find(e => e.NodeTo.Equals(edge.NodeFrom));
                 residualEdge.Capacity += minCapacity;
@@ -213,7 +221,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
         /// The target node.
         /// </param>
         /// <returns>
-        /// The <see cref="List"/>.
+        /// The <see cref="List"/> found path edges.
         /// </returns>
         private List<Edge> BreadthFirstSearch(Node sourceNode, Node targetNode)
         {
@@ -235,7 +243,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
                 }
 
                 var currentNodeEdges = currentNode.Edges;
-                foreach (var edge in currentNodeEdges)
+                foreach (var edge in currentNodeEdges.OrderBy(e => e.NodeTo.Name))
                 {
                     var nodeTo = edge.NodeTo;
                     if (edge.Capacity > 0 && !discoveredNodes.Contains(nodeTo))
@@ -265,7 +273,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
             List<Edge> path = this.BreadthFirstSearch(sourceNode, terminalNode);
 
             // color found path
-            HighlightFoundPath(path, Color.Orange);
+            HighlightFoundPath(path);
             graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
             ResetHighlight(path);
 
@@ -273,67 +281,58 @@ namespace MaxFlowMinCut.Lib.Algorithm
             {
                 var minCapacity = path.Min(e => e.Capacity);
 
-                this.AugmentedPath(path, minCapacity);
+                this.AugmentPath(path, minCapacity);
 
                 //TODO update flow values in flow graph
-                List<Edge> updatedPath = this.UpdateFlowValuesFlowGraph(path, minCapacity);
-
-                //TODO color augmented path in flow graph!
-                HighlightFoundPath(updatedPath, Color.Blue);
-                graphHistory.AddGraphStep(this.flowGraph);
-                //ResetHighlight(updatedPath);
+                //List<Edge> updatedPath = this.UpdateFlowValuesFlowGraph(path, minCapacity);
+                graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
 
                 this.maxFlow += minCapacity;
                 path = this.BreadthFirstSearch(sourceNode, terminalNode);
 
-                HighlightFoundPath(path, Color.Orange);
+                HighlightFoundPath(path);
                 graphHistory.AddGraphStep(this.flowGraph, this.residualGraph);
                 ResetHighlight(path);
             }
         }
 
-        private List<Edge> UpdateFlowValuesFlowGraph(List<Edge> path, int minCapacity)
-        {
-            List<Edge> updatedPath = new List<Edge>();
+        //private List<Edge> UpdateFlowValuesFlowGraph(List<Edge> path, int minCapacity)
+        //{
+        //    List<Edge> updatedPath = new List<Edge>();
 
-            foreach (var edge in path)
-            {
-                Edge found = flowGraph.Edges.FirstOrDefault(e => e.NodeFrom.Name.Equals(edge.NodeFrom.Name) && e.NodeTo.Name.Equals(edge.NodeTo.Name));
+        //    foreach (var edge in path)
+        //    {
+        //        Edge found = flowGraph.Edges.FirstOrDefault(e => e.NodeFrom.Name.Equals(edge.NodeFrom.Name) && e.NodeTo.Name.Equals(edge.NodeTo.Name));
 
-                if (found != null)
-                {
-                    found.Flow += minCapacity;
-                }
-                else
-                {
-                    found = flowGraph.Edges.FirstOrDefault(e => e.NodeTo.Name.Equals(edge.NodeFrom.Name) && e.NodeFrom.Name.Equals(edge.NodeTo.Name));
+        //        if (found != null)
+        //        {
+        //            found.Flow += minCapacity;
+        //        }
+        //        else
+        //        {
+        //            found = flowGraph.Edges.FirstOrDefault(e => e.NodeTo.Name.Equals(edge.NodeFrom.Name) && e.NodeFrom.Name.Equals(edge.NodeTo.Name));
 
-                    if (found != null)
-                    {
-                        found.Flow += minCapacity;
-                    }
-                }
+        //            if (found != null)
+        //            {
+        //                //todo check
+        //                found.Flow -= minCapacity;
+        //            }
+        //        }
 
-                if (found != null && found.Flow == found.Capacity)
-                {
-                    found.Thickness = 3;
-                }
-
-                updatedPath.Add(found);
-            }
-            return updatedPath;
-        }
+        //        updatedPath.Add(found);
+        //    }
+        //    return updatedPath;
+        //}
 
         /// <summary>
         /// Highlights the found path.
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <param name="highlightColor">Color of the highlight.</param>
-        private void HighlightFoundPath(List<Edge> path, Color highlightColor)
+        private void HighlightFoundPath(List<Edge> path)
         {
             if (path != null)
             {
-                path.ForEach(edge => edge.Foreground = highlightColor);
+                path.ForEach(edge => edge.IsPathMarked = true);
             }
         }
 
@@ -345,7 +344,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
         {
             if (path != null)
             {
-                path.ForEach(edge => edge.Foreground = Color.Black);
+                path.ForEach(edge => edge.IsPathMarked = false);
             }
         }
 
@@ -388,7 +387,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
             this.minCutEdges = new List<Edge>();
             foreach (
-                var node in this.residualGraph.Nodes.Where(p => this.minCutNodes.Any(r => r.Name.Equals(p.Name))).ToList())
+                var node in this.flowGraph.Nodes.Where(p => this.minCutNodes.Any(r => r.Name.Equals(p.Name))).ToList())
             {
                 var edges = node.Edges;
                 foreach (var edge in edges)
@@ -404,6 +403,9 @@ namespace MaxFlowMinCut.Lib.Algorithm
                     }
                 }
             }
+
+            minCutNodes.ForEach(mcn => mcn.IsMinCut = true);
+            minCutEdges.ForEach(mcn => mcn.IsMinCut = true);
         }
     }
 }

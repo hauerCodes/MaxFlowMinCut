@@ -121,14 +121,26 @@ namespace MaxFlowMinCut.Wpf.ViewModel
 
             // TEST-GRAPH
             this.InputEdges.Add(new InputEdge("s", "2", 10));
-            this.InputEdges.Add(new InputEdge("s", "3", 10));
-            this.InputEdges.Add(new InputEdge("2", "5", 8));
-            this.InputEdges.Add(new InputEdge("2", "3", 2));
-            this.InputEdges.Add(new InputEdge("2", "4", 4));
-            this.InputEdges.Add(new InputEdge("3", "5", 9));
-            this.InputEdges.Add(new InputEdge("4", "t", 10));
-            this.InputEdges.Add(new InputEdge("5", "4", 6));
+            this.InputEdges.Add(new InputEdge("s", "3", 5));
+            this.InputEdges.Add(new InputEdge("s", "4", 15));
+
+            this.InputEdges.Add(new InputEdge("2", "3", 4));
+            this.InputEdges.Add(new InputEdge("2", "5", 9));
+            this.InputEdges.Add(new InputEdge("2", "6", 15));
+
+            this.InputEdges.Add(new InputEdge("3", "6", 8));
+            this.InputEdges.Add(new InputEdge("3", "4", 4));
+
+            this.InputEdges.Add(new InputEdge("4", "7", 30));
+
+            this.InputEdges.Add(new InputEdge("5", "6", 15));
             this.InputEdges.Add(new InputEdge("5", "t", 10));
+
+            this.InputEdges.Add(new InputEdge("6", "7", 15));
+            this.InputEdges.Add(new InputEdge("6", "t", 10));
+
+            this.InputEdges.Add(new InputEdge("7", "3", 6));
+            this.InputEdges.Add(new InputEdge("7", "t", 10));
         }
 
         public bool IsVisualized { get; private set; }

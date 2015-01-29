@@ -37,6 +37,10 @@ namespace MaxFlowMinCut.Wpf.View
 
         private void OnFlowGraphChanged(object sender, Lib.Graph libGraph)
         {
+            var oldGraph = this.GViewerFlow.Graph;
+
+            //oldGraph.FindNode("a").Attr.Pos;
+            
             VisualGraph visualGraph = new VisualGraph(libGraph);
             Graph msaglGraph = visualGraph.CreateFlowGraph();
             //this.GViewerFlow.NeedToCalculateLayout = true;
