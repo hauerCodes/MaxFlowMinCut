@@ -38,7 +38,15 @@
                             <DataGridTextColumn Header="Capacity" Binding="{Binding Capacity}" Width="60" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <StackPanel Grid.Row="1">
+                    <StackPanel Grid.Row="1" >
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <TextBlock Text="Source:" Margin="0,0,3,0"/>
+                            <TextBox Width="40" Text="{Binding SourceNode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="5">
+                            <TextBlock  Margin="0,0,3,0">Target:</TextBlock>
+                            <TextBox Width="40" Text="{Binding TargetNode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></TextBox>
+                        </StackPanel>
                         <Button Command="{Binding VisualizeCommand}" Margin="5" VerticalAlignment="Bottom"
                                 Content="Visualize Input Graph" />
                         <Button Command="{Binding CalculateCommand}" Margin="5" VerticalAlignment="Bottom"
