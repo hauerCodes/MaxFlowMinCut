@@ -131,8 +131,12 @@ namespace MaxFlowMinCut.Lib.Network
         /// <summary>
         /// Equals the specified compare edge.
         /// </summary>
-        /// <param name="compareEdge">The compare edge.</param>
-        /// <returns>The equality of the compared edges.</returns>
+        /// <param name="compareEdge">
+        /// The compare edge.
+        /// </param>
+        /// <returns>
+        /// The equality of the compared edges.
+        /// </returns>
         public bool Equals(Edge compareEdge)
         {
             return this.ID.Equals(compareEdge.ID);

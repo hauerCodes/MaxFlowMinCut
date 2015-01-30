@@ -6,7 +6,6 @@
 //   The dependency graph wrapper.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Wpf.UserControl
 {
     using System.ComponentModel;

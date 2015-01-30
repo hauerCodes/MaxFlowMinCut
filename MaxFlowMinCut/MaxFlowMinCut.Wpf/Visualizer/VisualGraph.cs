@@ -6,7 +6,6 @@
 //   The visual graph.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Wpf.Visualizer
 {
     using System.Linq;

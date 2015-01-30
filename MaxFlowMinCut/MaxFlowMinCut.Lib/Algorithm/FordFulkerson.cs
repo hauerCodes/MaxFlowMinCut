@@ -6,7 +6,6 @@
 //   The ford fulkerson algorithm.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Lib.Algorithm
 {
     using System.Collections.Generic;
@@ -177,7 +176,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
         }
 
         /// <summary>
-        /// Augments the specified path. 
+        /// Augments the specified path.
         /// </summary>
         /// <param name="path">
         /// The path in the graph.

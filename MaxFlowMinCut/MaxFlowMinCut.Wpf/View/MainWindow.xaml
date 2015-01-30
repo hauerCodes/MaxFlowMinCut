@@ -51,8 +51,8 @@
                                 Content="Load Graph" />
                         <Button Command="{Binding SaveGraphCommand}" Margin="5" VerticalAlignment="Bottom"
                                 Content="Save Graph" />
-                        <Button Command="{Binding ResetGraphLayoutCommand}" Margin="5" VerticalAlignment="Bottom" 
-                                Content="Reset Graph Layout"  />
+                        <Button Command="{Binding ResetGraphLayoutCommand}" Margin="5" VerticalAlignment="Bottom"
+                                Content="Reset Graph Layout" />
                     </StackPanel>
                 </Grid>
             </GroupBox>

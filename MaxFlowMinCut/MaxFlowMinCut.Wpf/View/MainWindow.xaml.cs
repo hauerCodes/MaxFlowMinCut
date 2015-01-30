@@ -6,7 +6,6 @@
 //   Interaction logic for MainWindow.xaml.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Wpf.View
 {
     using System;
@@ -27,14 +26,14 @@ namespace MaxFlowMinCut.Wpf.View
         private readonly MainWindowViewModel viewModel;
 
         /// <summary>
-        /// The visual residual graph.
-        /// </summary>
-        private VisualGraph visualResidualGraph;
-
-        /// <summary>
         /// The visual flow graph.
         /// </summary>
         private VisualGraph visualFlowGraph;
+
+        /// <summary>
+        /// The visual residual graph.
+        /// </summary>
+        private VisualGraph visualResidualGraph;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -99,8 +98,12 @@ namespace MaxFlowMinCut.Wpf.View
         /// <summary>
         /// Called when a reset layout is requested.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The <see cref="RoutedEventArgs"/> instance containing the event data.
+        /// </param>
         private void OnResetGraphLayout(object sender, EventArgs e)
         {
             if (this.visualFlowGraph != null)

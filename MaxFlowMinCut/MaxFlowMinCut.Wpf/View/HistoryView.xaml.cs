@@ -13,7 +13,6 @@ namespace MaxFlowMinCut.Wpf.View
     using System.Windows.Forms.Integration;
 
     using MaxFlowMinCut.Lib.History;
-    using MaxFlowMinCut.Wpf.ViewModel;
     using MaxFlowMinCut.Wpf.Visualizer;
 
     using Microsoft.Msagl.Drawing;
@@ -42,22 +41,21 @@ namespace MaxFlowMinCut.Wpf.View
         {
             set
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    this.CreateGraphHistoryStepsUserControls(value);
-                });
+                Application.Current.Dispatcher.Invoke(() => { this.CreateGraphHistoryStepsUserControls(value); });
             }
         }
 
         /// <summary>
         /// Creates the graph history steps user controls.
         /// </summary>
-        /// <param name="history">The history.</param>
+        /// <param name="history">
+        /// The history.
+        /// </param>
         private void CreateGraphHistoryStepsUserControls(GraphHistory history)
         {
             foreach (GraphHistoryStep step in history)
             {
-                Grid stepGrid = new Grid();
+                var stepGrid = new Grid();
                 stepGrid.ColumnDefinitions.Add(new ColumnDefinition());
                 stepGrid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -67,25 +65,30 @@ namespace MaxFlowMinCut.Wpf.View
 
                 if (step.ResidualGraph != null)
                 {
-                    var viewerResidual = this.CreateGraphViewer(new VisualGraph(step.ResidualGraph).CreateResidualGraph());
+                    var viewerResidual =
+                        this.CreateGraphViewer(new VisualGraph(step.ResidualGraph).CreateResidualGraph());
                     stepGrid.Children.Add(viewerResidual);
                     viewerResidual.SetValue(Grid.ColumnProperty, 1);
                 }
 
-                StepsStackPanel.Children.Add(stepGrid);
+                this.StepsStackPanel.Children.Add(stepGrid);
             }
         }
 
         /// <summary>
         /// Creates the graph viewer.
         /// </summary>
-        /// <param name="graph">The graph.</param>
-        /// <returns>The created Graph Viewer host.</returns>
+        /// <param name="graph">
+        /// The graph.
+        /// </param>
+        /// <returns>
+        /// The created Graph Viewer host.
+        /// </returns>
         private UIElement CreateGraphViewer(Graph graph)
         {
-            GViewer graphViewer = new GViewer();
+            var graphViewer = new GViewer();
             graphViewer.ToolBarIsVisible = false;
-            WindowsFormsHost host = new WindowsFormsHost();
+            var host = new WindowsFormsHost();
             host.Child = graphViewer;
             host.Height = 300;
             graphViewer.Graph = graph;
