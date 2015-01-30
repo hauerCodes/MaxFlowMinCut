@@ -6,7 +6,6 @@
 //   Interaction logic for App.xaml.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Wpf
 {
     using System.Windows;

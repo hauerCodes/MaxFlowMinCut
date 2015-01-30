@@ -73,8 +73,12 @@ namespace MaxFlowMinCut.Lib.Network
         /// <summary>
         /// Equals the specified compare node.
         /// </summary>
-        /// <param name="compareNode">The compare node.</param>
-        /// <returns>The equality of the compared nodes.</returns>
+        /// <param name="compareNode">
+        /// The compare node.
+        /// </param>
+        /// <returns>
+        /// The equality of the compared nodes.
+        /// </returns>
         public bool Equals(Node compareNode)
         {
             return this.ID.Equals(compareNode.ID);

@@ -6,14 +6,30 @@
 //   The input edge.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace MaxFlowMinCut.Wpf.Model
 {
+    using System;
+
     /// <summary>
     /// The input edge.
     /// </summary>
     public class InputEdge
     {
+        /// <summary>
+        /// The capacity.
+        /// </summary>
+        private int capacity;
+
+        /// <summary>
+        /// The node from.
+        /// </summary>
+        private string nodeFrom;
+
+        /// <summary>
+        /// The node to.
+        /// </summary>
+        private string nodeTo;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InputEdge"/> class.
         /// </summary>
@@ -47,7 +63,18 @@ namespace MaxFlowMinCut.Wpf.Model
         /// <value>
         /// The node from.
         /// </value>
-        public string NodeFrom { get; set; }
+        public string NodeFrom
+        {
+            get
+            {
+                return this.nodeFrom;
+            }
+
+            set
+            {
+                this.nodeFrom = value.ToLower();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the node to.
@@ -55,7 +82,18 @@ namespace MaxFlowMinCut.Wpf.Model
         /// <value>
         /// The node to.
         /// </value>
-        public string NodeTo { get; set; }
+        public string NodeTo
+        {
+            get
+            {
+                return this.nodeTo;
+            }
+
+            set
+            {
+                this.nodeTo = value.ToLower();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the capacity.
@@ -63,6 +101,17 @@ namespace MaxFlowMinCut.Wpf.Model
         /// <value>
         /// The capacity.
         /// </value>
-        public int Capacity { get; set; }
+        public int Capacity
+        {
+            get
+            {
+                return this.capacity;
+            }
+
+            set
+            {
+                this.capacity = Math.Max(value, 1);
+            }
+        }
     }
 }

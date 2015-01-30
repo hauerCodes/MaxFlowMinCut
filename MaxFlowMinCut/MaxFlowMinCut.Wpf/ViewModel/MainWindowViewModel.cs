@@ -342,9 +342,9 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.VisualizeCommand = new RelayCommand(this.ExecuteVisualizeGraph, this.CanExecuteVisualizeCommand);
 
             this.CalculateCommand = new DependentRelayCommand(
-                this.ExecuteCalculateGraph,
-                this.CanExecuteCalculateCommand,
-                this,
+                this.ExecuteCalculateGraph, 
+                this.CanExecuteCalculateCommand, 
+                this, 
                 () => this.IsVisualized);
 
             this.ClearGraphCommand = new RelayCommand(this.ExecuteClearGraph);
@@ -354,11 +354,11 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.SaveGraphCommand = new RelayCommand(this.ExecuteSaveGraph, this.CanExecuteSaveGraphCommand);
 
             this.FirstStepCommand = new RelayCommand(
-                this.ExecuteVisualizeFirstGraphStep,
+                this.ExecuteVisualizeFirstGraphStep, 
                 this.CanExecuteFirstStepCommand);
 
             this.StepForwardCommand = new RelayCommand(
-                this.ExecuteVisualizeNextGraphStep,
+                this.ExecuteVisualizeNextGraphStep, 
                 this.CanExecuteStepForwardCommand);
 
             this.PlayStepsCommand = new RelayCommand(this.ExecutePlaySteps, this.CanExecutePlayStepsCommand);
@@ -366,18 +366,22 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.PauseStepsCommand = new RelayCommand(this.ExecutePauseSteps, this.CanExecutePauseStepsCommand);
 
             this.StepBackwardCommand = new RelayCommand(
-                this.ExecuteVisualizePreviousGraphStep,
+                this.ExecuteVisualizePreviousGraphStep, 
                 this.CanExecuteStepBackwardCommand);
 
             this.LastStepCommand = new RelayCommand(this.ExecuteVisualizeLastGraphStep, this.CanExecuteLastStepCommand);
 
             this.ShowGraphHistoryCommand = new DependentRelayCommand(
-                this.ExecuteShowGraphHistory,
-                this.CanExecuteShowGraphHistoryCommand,
-                this,
+                this.ExecuteShowGraphHistory, 
+                this.CanExecuteShowGraphHistoryCommand, 
+                this, 
                 () => this.IsCalculated);
 
-            this.ResetGraphLayoutCommand = new DependentRelayCommand(this.RaiseResetGraphLayout, () => this.IsVisualized, this, () => this.IsVisualized);
+            this.ResetGraphLayoutCommand = new DependentRelayCommand(
+                this.RaiseResetGraphLayout, 
+                () => this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled, 
+                this, 
+                () => this.IsVisualized);
         }
 
         /// <summary>
@@ -658,8 +662,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </summary>
         private void ExecuteShowGraphHistory()
         {
-            var view = new HistoryView();
-            view.GraphHistory = this.graphSteps;
+            var view = new HistoryView { GraphHistory = this.graphSteps };
 
             view.Show();
         }
@@ -687,7 +690,9 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </summary>
         private void ExecuteCalculateGraph()
         {
-            var fordFulkerson = new FordFulkerson(this.visualizedGraph, "s", "t");
+            const string Source = "s";
+            const string Target = "t";
+            var fordFulkerson = new FordFulkerson(this.visualizedGraph, Source, Target);
 
             this.graphSteps = fordFulkerson.RunAlgorithm();
             this.IsCalculated = true;
@@ -706,14 +711,15 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.InputEdges = new ObservableCollection<InputEdge>();
             this.InputEdges.CollectionChanged += (sender, e) =>
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        this.IsVisualized = false;
-                        this.IsCalculated = false;
-                    });
+                    Application.Current.Dispatcher.Invoke(
+                        () =>
+                            {
+                                this.IsVisualized = false;
+                                this.IsCalculated = false;
+                            });
                 };
 
-            // TEST-GRAPH
+            // INITIAL-TEST-GRAPH
             this.InputEdges.Add(new InputEdge("s", "2", 10));
             this.InputEdges.Add(new InputEdge("s", "3", 5));
             this.InputEdges.Add(new InputEdge("s", "4", 15));
@@ -745,7 +751,8 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </returns>
         private bool CanExecuteVisualizeCommand()
         {
-            var allEdgesHaveNodes = this.InputEdges.All(edge => !string.IsNullOrEmpty(edge.NodeFrom) && !string.IsNullOrEmpty(edge.NodeTo));
+            var allEdgesHaveNodes =
+                this.InputEdges.All(edge => !string.IsNullOrEmpty(edge.NodeFrom) && !string.IsNullOrEmpty(edge.NodeTo));
             return this.InputEdges.Count > 0 && allEdgesHaveNodes && !this.playStepsDispatcherTimer.IsEnabled;
         }
 

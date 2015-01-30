@@ -6,10 +6,8 @@
         xmlns:vm="clr-namespace:MaxFlowMinCut.Wpf.ViewModel"
         xmlns:userControl="clr-namespace:MaxFlowMinCut.Wpf.UserControl"
         AllowsTransparency="False"
-        Title="HistoryView" Height="600" Width="700">
+        Title="History" Height="600" Width="700">
     <ScrollViewer>
-    <StackPanel x:Name="StepsStackPanel" >
-        
-    </StackPanel>
+        <StackPanel x:Name="StepsStackPanel" />
     </ScrollViewer>
 </Window>
