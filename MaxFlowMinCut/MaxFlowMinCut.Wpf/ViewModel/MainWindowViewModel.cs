@@ -360,8 +360,10 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.CalculateCommand = new DependentRelayCommand(
                 this.ExecuteCalculateGraph,
                 this.CanExecuteCalculateCommand,
-                this,
-                () => this.IsVisualized, () => this.SourceNode, () => this.TargetNode);
+                this, 
+                () => this.IsVisualized, 
+                () => this.SourceNode, 
+                () => this.TargetNode);
 
             this.ClearGraphCommand = new RelayCommand(this.ExecuteClearGraph);
 
@@ -526,7 +528,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
                 var targetEdge = this.InputEdges.FirstOrDefault(e => e.NodeTo.Equals(this.TargetNode));
                 string targetName = string.Empty;
 
-                if(targetEdge != null)
+                if (targetEdge != null)
                 {
                     targetName = targetEdge.NodeTo;
                 }
