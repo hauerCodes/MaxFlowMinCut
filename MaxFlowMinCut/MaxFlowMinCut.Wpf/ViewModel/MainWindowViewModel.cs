@@ -221,6 +221,22 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public Graph FlowGraph { get; set; }
 
         /// <summary>
+        /// Gets or sets the source node.
+        /// </summary>
+        /// <value>
+        /// The source node.
+        /// </value>
+        public string SourceNode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the target node.
+        /// </summary>
+        /// <value>
+        /// The target node.
+        /// </value>
+        public string TargetNode { get; set; }
+
+        /// <summary>
         /// Gets or sets the last step command.
         /// </summary>
         /// <value>
@@ -342,10 +358,10 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.VisualizeCommand = new RelayCommand(this.ExecuteVisualizeGraph, this.CanExecuteVisualizeCommand);
 
             this.CalculateCommand = new DependentRelayCommand(
-                this.ExecuteCalculateGraph, 
-                this.CanExecuteCalculateCommand, 
-                this, 
-                () => this.IsVisualized);
+                this.ExecuteCalculateGraph,
+                this.CanExecuteCalculateCommand,
+                this,
+                () => this.IsVisualized, () => this.SourceNode, () => this.TargetNode);
 
             this.ClearGraphCommand = new RelayCommand(this.ExecuteClearGraph);
 
@@ -354,11 +370,11 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.SaveGraphCommand = new RelayCommand(this.ExecuteSaveGraph, this.CanExecuteSaveGraphCommand);
 
             this.FirstStepCommand = new RelayCommand(
-                this.ExecuteVisualizeFirstGraphStep, 
+                this.ExecuteVisualizeFirstGraphStep,
                 this.CanExecuteFirstStepCommand);
 
             this.StepForwardCommand = new RelayCommand(
-                this.ExecuteVisualizeNextGraphStep, 
+                this.ExecuteVisualizeNextGraphStep,
                 this.CanExecuteStepForwardCommand);
 
             this.PlayStepsCommand = new RelayCommand(this.ExecutePlaySteps, this.CanExecutePlayStepsCommand);
@@ -366,21 +382,21 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.PauseStepsCommand = new RelayCommand(this.ExecutePauseSteps, this.CanExecutePauseStepsCommand);
 
             this.StepBackwardCommand = new RelayCommand(
-                this.ExecuteVisualizePreviousGraphStep, 
+                this.ExecuteVisualizePreviousGraphStep,
                 this.CanExecuteStepBackwardCommand);
 
             this.LastStepCommand = new RelayCommand(this.ExecuteVisualizeLastGraphStep, this.CanExecuteLastStepCommand);
 
             this.ShowGraphHistoryCommand = new DependentRelayCommand(
-                this.ExecuteShowGraphHistory, 
-                this.CanExecuteShowGraphHistoryCommand, 
-                this, 
+                this.ExecuteShowGraphHistory,
+                this.CanExecuteShowGraphHistoryCommand,
+                this,
                 () => this.IsCalculated);
 
             this.ResetGraphLayoutCommand = new DependentRelayCommand(
-                this.RaiseResetGraphLayout, 
-                () => this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled, 
-                this, 
+                this.RaiseResetGraphLayout,
+                () => this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled,
+                this,
                 () => this.IsVisualized);
         }
 
@@ -490,13 +506,33 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </returns>
         private bool CanExecuteCalculateCommand()
         {
+            if (string.IsNullOrEmpty(this.SourceNode) || string.IsNullOrEmpty(this.TargetNode))
+            {
+                return false;
+            }
+
             try
             {
-                var inputEdgesContainsSource = this.InputEdges.Any(e => e.NodeFrom.Equals("s"));
-                var inputEdgesContainsTarget = this.InputEdges.Any(e => e.NodeTo.Equals("t"));
+                var inputEdgesContainsSource = this.InputEdges.Any(e => e.NodeFrom.Equals(this.SourceNode));
+                var inputEdgesContainsTarget = this.InputEdges.Any(e => e.NodeTo.Equals(this.TargetNode));
 
-                var onlyOutgoingFromSource = this.inputEdges.All(e => !e.NodeFrom.Equals("t"));
-                var onlyInToTarget = this.inputEdges.All(e => !e.NodeTo.Equals("s"));
+                var sourceEdge = this.InputEdges.FirstOrDefault(e => e.NodeFrom.Equals(this.SourceNode));
+                string sourceName = string.Empty;
+                if (sourceEdge != null)
+                {
+                    sourceName = sourceEdge.NodeFrom;
+                }
+
+                var targetEdge = this.InputEdges.FirstOrDefault(e => e.NodeTo.Equals(this.TargetNode));
+                string targetName = string.Empty;
+
+                if(targetEdge != null)
+                {
+                    targetName = targetEdge.NodeTo;
+                }
+
+                var onlyOutgoingFromSource = this.inputEdges.All(e => !e.NodeTo.Equals(sourceName));
+                var onlyInToTarget = this.inputEdges.All(e => !e.NodeFrom.Equals(targetName));
 
                 return this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled && inputEdgesContainsSource
                        && inputEdgesContainsTarget && onlyOutgoingFromSource && onlyInToTarget;
@@ -713,10 +749,10 @@ namespace MaxFlowMinCut.Wpf.ViewModel
                 {
                     Application.Current.Dispatcher.Invoke(
                         () =>
-                            {
-                                this.IsVisualized = false;
-                                this.IsCalculated = false;
-                            });
+                        {
+                            this.IsVisualized = false;
+                            this.IsCalculated = false;
+                        });
                 };
 
             // INITIAL-TEST-GRAPH
