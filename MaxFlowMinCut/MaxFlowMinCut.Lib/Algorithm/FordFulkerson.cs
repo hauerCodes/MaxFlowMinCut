@@ -356,7 +356,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
                 var edges = node.Edges;
                 foreach (var edge in edges)
                 {
-                    if (this.minCutNodes.Any(p => p.Name.Equals(edge.NodeTo.Name)))
+                    if (this.minCutNodes.Any(p => p.Equals(edge.NodeTo)))
                     {
                         continue;
                     }
