@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:graphViewerGdi="clr-namespace:Microsoft.Msagl.GraphViewerGdi;assembly=Microsoft.Msagl.GraphViewerGdi"
         xmlns:visualizer="clr-namespace:MaxFlowMinCut.Wpf.Visualizer"
-        xmlns:his="clr-namespace:MaxFlowMinCut.Lib.History;assembly=MaxFlowMinCut.Lib"
+        xmlns:vm="clr-namespace:MaxFlowMinCut.Wpf.ViewModel"
         xmlns:userControl="clr-namespace:MaxFlowMinCut.Wpf.UserControl"
         AllowsTransparency="False"
         Title="HistoryView" Height="600" Width="700">
-    <Grid>
-        <userControl:DependencyGraphWrapper Grid.Column="0" FlowGraph="{Binding FlowGraph}" Height="300"
-                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-
-    </Grid>
+    <ScrollViewer>
+    <StackPanel x:Name="StepsStackPanel" >
+        
+    </StackPanel>
+    </ScrollViewer>
 </Window>

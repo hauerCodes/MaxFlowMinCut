@@ -9,6 +9,7 @@
 
 namespace MaxFlowMinCut.Wpf.View
 {
+    using System;
     using System.Windows;
 
     using MaxFlowMinCut.Lib;
@@ -26,6 +27,16 @@ namespace MaxFlowMinCut.Wpf.View
         private readonly MainWindowViewModel viewModel;
 
         /// <summary>
+        /// The visual residual graph.
+        /// </summary>
+        private VisualGraph visualResidualGraph;
+
+        /// <summary>
+        /// The visual flow graph.
+        /// </summary>
+        private VisualGraph visualFlowGraph;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
@@ -35,6 +46,7 @@ namespace MaxFlowMinCut.Wpf.View
             this.viewModel = (MainWindowViewModel)this.DataContext;
             this.viewModel.FlowGraphChanged += this.OnFlowGraphChanged;
             this.viewModel.ResidualGraphChanged += this.OnResidualGraphChanged;
+            this.viewModel.ResetGraphLayout += this.OnResetGraphLayout;
         }
 
         /// <summary>
@@ -51,8 +63,8 @@ namespace MaxFlowMinCut.Wpf.View
             // var oldGraph = this.GViewerFlow.Graph;
 
             ////oldGraph.FindNode("a").Attr.Pos;
-            var visualGraph = new VisualGraph(libGraph);
-            var msaglGraph = visualGraph.CreateFlowGraph();
+            this.visualFlowGraph = new VisualGraph(libGraph);
+            var msaglGraph = this.visualFlowGraph.CreateFlowGraph();
 
             // this.GViewerFlow.NeedToCalculateLayout = true;
             this.GViewerFlow.Graph = msaglGraph;
@@ -73,13 +85,32 @@ namespace MaxFlowMinCut.Wpf.View
         {
             if (libGraph != null)
             {
-                var visualGraph = new VisualGraph(libGraph);
-                var msaglGraph = visualGraph.CreateResidualGraph();
+                this.visualResidualGraph = new VisualGraph(libGraph);
+                var msaglGraph = this.visualResidualGraph.CreateResidualGraph();
                 this.GViewerResidual.Graph = msaglGraph;
             }
             else
             {
+                this.visualResidualGraph = null;
                 this.GViewerResidual.Graph = null;
+            }
+        }
+
+        /// <summary>
+        /// Called when a reset layout is requested.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void OnResetGraphLayout(object sender, EventArgs e)
+        {
+            if (this.visualFlowGraph != null)
+            {
+                this.GViewerFlow.Graph = this.visualFlowGraph.CreateFlowGraph();
+            }
+
+            if (this.visualResidualGraph != null)
+            {
+                this.GViewerResidual.Graph = this.visualResidualGraph.CreateResidualGraph();
             }
         }
     }

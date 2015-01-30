@@ -104,7 +104,6 @@
     <Compile Include="UserControl\DependencyGraphWrapper.xaml.cs">
       <DependentUpon>DependencyGraphWrapper.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\HistoryViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\HistoryView.xaml.cs">
       <DependentUpon>HistoryView.xaml</DependentUpon>

@@ -11,6 +11,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Windows;
@@ -82,6 +83,11 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public event EventHandler<Graph> ResidualGraphChanged;
 
         /// <summary>
+        /// Occurs when [reset graph layout].
+        /// </summary>
+        public event EventHandler ResetGraphLayout;
+
+        /// <summary>
         /// Gets a value indicating whether is visualized.
         /// </summary>
         /// <value>
@@ -144,6 +150,14 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// The go to end command.
         /// </value>
         public RelayCommand GoToEndCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the reset graph layout command.
+        /// </summary>
+        /// <value>
+        /// The reset graph layout command.
+        /// </value>
+        public DependentRelayCommand ResetGraphLayoutCommand { get; private set; }
 
         /// <summary>
         /// Gets the clear graph command.
@@ -263,6 +277,18 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         public RelayCommand SaveGraphCommand { get; set; }
 
         /// <summary>
+        /// Called when reset graph layout reset was requested.
+        /// </summary>
+        private void RaiseResetGraphLayout()
+        {
+            var handler = this.ResetGraphLayout;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
         /// The convert input edges to graph.
         /// </summary>
         /// <param name="inputEdges">
@@ -271,7 +297,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// <returns>
         /// The <see cref="Graph"/>.
         /// </returns>
-        private static Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
+        private Graph ConvertInputEdgesToGraph(IEnumerable<InputEdge> inputEdges)
         {
             var graph = new Graph();
 
@@ -316,9 +342,9 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.VisualizeCommand = new RelayCommand(this.ExecuteVisualizeGraph, this.CanExecuteVisualizeCommand);
 
             this.CalculateCommand = new DependentRelayCommand(
-                this.ExecuteCalculateGraph, 
-                this.CanExecuteCalculateCommand, 
-                this, 
+                this.ExecuteCalculateGraph,
+                this.CanExecuteCalculateCommand,
+                this,
                 () => this.IsVisualized);
 
             this.ClearGraphCommand = new RelayCommand(this.ExecuteClearGraph);
@@ -328,11 +354,11 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.SaveGraphCommand = new RelayCommand(this.ExecuteSaveGraph, this.CanExecuteSaveGraphCommand);
 
             this.FirstStepCommand = new RelayCommand(
-                this.ExecuteVisualizeFirstGraphStep, 
+                this.ExecuteVisualizeFirstGraphStep,
                 this.CanExecuteFirstStepCommand);
 
             this.StepForwardCommand = new RelayCommand(
-                this.ExecuteVisualizeNextGraphStep, 
+                this.ExecuteVisualizeNextGraphStep,
                 this.CanExecuteStepForwardCommand);
 
             this.PlayStepsCommand = new RelayCommand(this.ExecutePlaySteps, this.CanExecutePlayStepsCommand);
@@ -340,16 +366,18 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.PauseStepsCommand = new RelayCommand(this.ExecutePauseSteps, this.CanExecutePauseStepsCommand);
 
             this.StepBackwardCommand = new RelayCommand(
-                this.ExecuteVisualizePreviousGraphStep, 
+                this.ExecuteVisualizePreviousGraphStep,
                 this.CanExecuteStepBackwardCommand);
 
             this.LastStepCommand = new RelayCommand(this.ExecuteVisualizeLastGraphStep, this.CanExecuteLastStepCommand);
 
             this.ShowGraphHistoryCommand = new DependentRelayCommand(
-                this.ExecuteShowGraphHistory, 
-                this.CanExecuteShowGraphHistoryCommand, 
-                this, 
+                this.ExecuteShowGraphHistory,
+                this.CanExecuteShowGraphHistoryCommand,
+                this,
                 () => this.IsCalculated);
+
+            this.ResetGraphLayoutCommand = new DependentRelayCommand(this.RaiseResetGraphLayout, () => this.IsVisualized, this, () => this.IsVisualized);
         }
 
         /// <summary>
@@ -458,11 +486,22 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </returns>
         private bool CanExecuteCalculateCommand()
         {
-            var inputEdgesContainsSource = this.InputEdges.Any(e => e.NodeFrom.Equals("s"));
-            var inputEdgesContainsTarget = this.InputEdges.Any(e => e.NodeTo.Equals("t"));
+            try
+            {
+                var inputEdgesContainsSource = this.InputEdges.Any(e => e.NodeFrom.Equals("s"));
+                var inputEdgesContainsTarget = this.InputEdges.Any(e => e.NodeTo.Equals("t"));
 
-            return this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled && inputEdgesContainsSource
-                   && inputEdgesContainsTarget;
+                var onlyOutgoingFromSource = this.inputEdges.All(e => !e.NodeFrom.Equals("t"));
+                var onlyInToTarget = this.inputEdges.All(e => !e.NodeTo.Equals("s"));
+
+                return this.IsVisualized && !this.playStepsDispatcherTimer.IsEnabled && inputEdgesContainsSource
+                       && inputEdgesContainsTarget && onlyOutgoingFromSource && onlyInToTarget;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return false;
+            }
         }
 
         /// <summary>
@@ -523,6 +562,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             else
             {
                 this.playStepsDispatcherTimer.Stop();
+                this.PauseStepsCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -618,7 +658,8 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </summary>
         private void ExecuteShowGraphHistory()
         {
-            var view = new HistoryView { DataContext = new HistoryViewModel(this.graphSteps) };
+            var view = new HistoryView();
+            view.GraphHistory = this.graphSteps;
 
             view.Show();
         }
@@ -665,8 +706,11 @@ namespace MaxFlowMinCut.Wpf.ViewModel
             this.InputEdges = new ObservableCollection<InputEdge>();
             this.InputEdges.CollectionChanged += (sender, e) =>
                 {
-                    this.IsVisualized = false;
-                    this.IsCalculated = false;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        this.IsVisualized = false;
+                        this.IsCalculated = false;
+                    });
                 };
 
             // TEST-GRAPH
@@ -701,7 +745,8 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </returns>
         private bool CanExecuteVisualizeCommand()
         {
-            return this.InputEdges.Count > 0 && !this.playStepsDispatcherTimer.IsEnabled;
+            var allEdgesHaveNodes = this.InputEdges.All(edge => !string.IsNullOrEmpty(edge.NodeFrom) && !string.IsNullOrEmpty(edge.NodeTo));
+            return this.InputEdges.Count > 0 && allEdgesHaveNodes && !this.playStepsDispatcherTimer.IsEnabled;
         }
 
         /// <summary>
@@ -709,7 +754,7 @@ namespace MaxFlowMinCut.Wpf.ViewModel
         /// </summary>
         private void ExecuteVisualizeGraph()
         {
-            this.visualizedGraph = ConvertInputEdgesToGraph(this.InputEdges);
+            this.visualizedGraph = this.ConvertInputEdgesToGraph(this.InputEdges);
             this.RaiseFlowGraphChanged(this, this.visualizedGraph);
 
             this.IsVisualized = true;
