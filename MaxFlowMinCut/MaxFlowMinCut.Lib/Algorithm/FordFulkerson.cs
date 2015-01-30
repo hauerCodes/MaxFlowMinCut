@@ -351,7 +351,7 @@ namespace MaxFlowMinCut.Lib.Algorithm
 
             this.minCutEdges = new List<Edge>();
             foreach (
-                var node in this.flowGraph.Nodes.Where(p => this.minCutNodes.Any(r => r.Name.Equals(p.Name))).ToList())
+                var node in this.flowGraph.Nodes.Where(p => this.minCutNodes.Any(r => r.Equals(p))).ToList())
             {
                 var edges = node.Edges;
                 foreach (var edge in edges)
