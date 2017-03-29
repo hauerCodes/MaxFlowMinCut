@@ -1,9 +1,14 @@
 # MaxFlowMinCut
 Minimum cut / maximum flow
 
-Develop an algorithm to calculate the minimal cut
-and maximum flow of a river network. Use to
+Algorithm to calculate the minimal cut
+and maximum flow of a network. Use to
 Graphical visualization of the algorithm a suitable framework
+
+For more info see [Ford-Fulkerson algorithm](https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm) on Wikipedia
+
+### UI Example
+![UI](docs/ui.png)
 
 ### German Intro
 
